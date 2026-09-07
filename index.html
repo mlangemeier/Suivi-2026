@@ -1,0 +1,2464 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suivi 2026 v66</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <h1 class="logo">Suivi 2026</h1>
+                <span class="version-badge" onclick="showVersionHistory()" title="Voir l&#39;historique des versions" style="cursor:pointer;">v66</span>
+            </div>
+            <div class="header-actions">
+                <button class="theme-toggle" onclick="toggleTheme()" title="Changer le thème">
+                    <span id="themeIcon">🌙</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Controls Bar -->
+        <div class="controls-bar">
+            <div class="controls-group">
+                <button class="btn btn-secondary" onclick="downloadAllData()">
+                    <span>📥</span> Exporter
+                </button>
+                <button class="btn btn-secondary" onclick="document.getElementById(&#39;fileImportInput&#39;).click()">
+                    <span>📤</span> Importer
+                </button>
+                <button class="btn btn-secondary" onclick="resetData()">
+                    <span>🔄</span> Réinitialiser
+                </button>
+                <button class="btn btn-intersports" onclick="openRecapInterSports()">
+                    <span>📊</span> Recap InterSports
+                </button>
+            </div>
+            <div class="last-save" id="mainLastSaveInfo">
+                <strong>Dernier export :</strong> <span id="mainLastSaveTime">03/09/2026 19:02:35</span>
+            </div>
+        </div>
+
+        <!-- Alert Box -->
+        <div id="alertBox" class="alert success">Jour 3 mis à jour!</div>
+
+        <!-- Hidden File Input -->
+        <input type="file" id="fileImportInput" accept=".txt" onchange="handleFileImport(this)">
+
+        <!-- Page Tabs -->
+        <div class="page-tabs" id="mainPageTabs">
+            <button type="button" class="page-tab" data-page="series">SÉRIES</button>
+            <button type="button" class="page-tab" data-page="jump">JUMPS</button>
+            <button type="button" class="page-tab" data-page="pas">10 000 PAS</button>
+            <button type="button" class="page-tab" data-page="jogging">JOGGING</button>
+            <button type="button" class="page-tab" data-page="natation">NATATION</button>
+            <button type="button" class="page-tab active" data-page="corde">CORDE À SAUTER</button>
+        </div>
+
+        <!-- Page: SERIES -->
+        <div id="page-series" class="page-content" style="">
+            <div class="nav-bar">
+                <div class="nav-title">
+                    <span class="nav-title-icon">📅</span>
+                    <span id="navCurrentMonth-series">Septembre 2026</span>
+                </div>
+                <div class="nav-controls">
+                    <button class="nav-btn" onclick="previousMonth(&#39;series&#39;)">← Précédent</button>
+                    <select class="nav-select" id="monthSelect-series" onchange="changeMonth(&#39;series&#39;)">
+                        <option value="0">Janvier</option>
+                        <option value="1">Février</option>
+                        <option value="2">Mars</option>
+                        <option value="3">Avril</option>
+                        <option value="4">Mai</option>
+                        <option value="5">Juin</option>
+                        <option value="6">Juillet</option>
+                        <option value="7">Août</option>
+                        <option value="8">Septembre</option>
+                        <option value="9">Octobre</option>
+                        <option value="10">Novembre</option>
+                        <option value="11">Décembre</option>
+                    </select>
+                    <select class="nav-select" id="yearSelect-series" onchange="changeYear(&#39;series&#39;)">
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                        <option value="2028">2028</option>
+                    </select>
+                    <button class="nav-btn" onclick="nextMonth(&#39;series&#39;)">Suivant →</button>
+                    <button class="nav-today" onclick="goToToday(&#39;series&#39;)">
+                        <span>●</span> Aujourd'hui
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Card -->
+            <div class="card">
+                <div class="card-header" onclick="toggleSection(&#39;statsSection-series&#39;)">
+                    <h2 class="card-title">📊 Statistiques Globales</h2>
+                    <button class="toggle-btn" id="statsToggle-series">▼</button>
+                </div>
+                <div class="section-content" id="statsSection-series">
+                    <div class="stats-grid">
+                        <div class="stat-card highlight-total pulsing">
+                            <div class="stat-value" id="totalSeries-series">3</div>
+                            <div class="stat-label">Séries Total</div>
+                        </div>
+                        <div class="stat-card trend-stable" id="tendanceCard-series">
+                            <div class="stat-value">
+                                <span class="trend-arrow stable" id="tendanceArrow-series">→</span>
+                            </div>
+                            <div class="stat-label">Tendance</div>
+                            <div class="trend-label" id="tendanceLabel-series">Stable</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="objectifDisplay-series">30</div>
+                            <div class="stat-label">Objectif</div>
+                        </div>
+                        <div class="stat-card" id="manqueCard-series">
+                            <div class="stat-value" id="manque-series">0</div>
+                            <div class="stat-label" id="manqueLabel-series">Manque</div>
+                        </div>
+                        <div class="stat-card" id="consecutifFaitCard-series">
+                            <div class="stat-value" id="consecutifFait-series">3</div>
+                            <div class="stat-label">Consécutif de fait</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="nbreAtteint-series">3/3</div>
+                            <div class="stat-label">Nbre atteint</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="consecutifZero-series">0</div>
+                            <div class="stat-label">Consécutifs à 0</div>
+                        </div>
+                        <div class="stat-card" id="moyenneCard-series">
+                            <div class="stat-value" id="moyenneJournaliere-series">100%</div>
+                            <div class="stat-label">% / Jours</div>
+                        </div>
+                        <div class="stat-card" id="predictionCard-series">
+                            <div class="stat-value" id="prediction-series">30</div>
+                            <div class="stat-label">Prédiction</div>
+                        </div>
+                        <div class="stat-card" id="totalZeroCard-series">
+                            <div class="stat-value" id="totalZero-series">0</div>
+                            <div class="stat-label">Total 0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalUn-series">3</div>
+                            <div class="stat-label">Total 1</div>
+                        </div>
+                        <div class="stat-card" id="totalDeuxCard-series">
+                            <div class="stat-value" id="totalDeux-series">0</div>
+                            <div class="stat-label">Total 2</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalTrois-series">0</div>
+                            <div class="stat-label">Total 3</div>
+                        </div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-header">
+                            <span class="progress-label">Progression vers l'objectif</span>
+                            <span class="progress-value" id="progressText-series">10%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressBar-series" style="width: 10%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart Card -->
+            <div class="card">
+                <div class="card-header" onclick="toggleSection(&#39;chartSection-series&#39;)">
+                    <h2 class="card-title">📈 Graphique de Progression</h2>
+                    <button class="toggle-btn" id="chartToggle-series">▼</button>
+                </div>
+                <div class="section-content" id="chartSection-series">
+                    <div class="legend-controls" id="legendControls-series">
+                        <button class="legend-btn active" onclick="toggleChartSeries(&#39;series&#39;, &#39;daily&#39;)">
+                            <span class="legend-dot" style="background: #2563eb"></span> Par Jour
+                        </button>
+                        <button class="legend-btn active" onclick="toggleChartSeries(&#39;series&#39;, &#39;cumulative&#39;)">
+                            <span class="legend-dot" style="background: #7c3aed"></span> Cumulatif
+                        </button>
+                        <button class="legend-btn active" onclick="toggleChartSeries(&#39;series&#39;, &#39;target&#39;)">
+                            <span class="legend-dot" style="background: #ef4444"></span> Objectif
+                        </button>
+                        <button class="legend-btn active" onclick="toggleChartSeries(&#39;series&#39;, &#39;prediction&#39;)">
+                            <span class="legend-dot" style="background: #10b981"></span> Prédiction
+                        </button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="progressChart-series" width="1720" style="max-height: 330px; height: 330px; width: 1147px; display: block; box-sizing: border-box;" height="495"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Days Card -->
+            <div class="card">
+                <div class="card-header" onclick="toggleSection(&#39;daysSection-series&#39;)">
+                    <h2 class="card-title">📆 Séries par Jour</h2>
+                    <button class="toggle-btn" id="daysToggle-series">▼</button>
+                </div>
+                <div class="section-content" id="daysSection-series">
+                    <div class="days-grid" id="daysGrid-series"><div class="day-card has-value streak-1" data-streak-days="1" data-streak-total="1">
+                    <div class="day-number">Jour 1</div>
+                    <input type="number" value="1" min="0" onchange="updateDaySeries(0, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    <div class="streak-badge">Série faible · 1</div>
+                </div><div class="day-card has-value streak-2" data-streak-days="2" data-streak-total="2">
+                    <div class="day-number">Jour 2</div>
+                    <input type="number" value="1" min="0" onchange="updateDaySeries(1, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    <div class="streak-badge">Série faible · 2</div>
+                </div><div class="day-card today has-value streak-3" data-streak-days="3" data-streak-total="3">
+                    <div class="day-number">Jour 3</div>
+                    <input type="number" value="1" min="0" onchange="updateDaySeries(2, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    <div class="streak-badge">Série faible · 3</div>
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 4</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(3, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 5</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(4, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 6</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(5, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 7</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(6, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 8</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(7, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 9</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(8, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 10</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(9, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 11</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(10, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 12</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(11, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 13</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(12, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 14</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(13, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 15</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(14, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 16</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(15, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 17</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(16, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 18</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(17, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 19</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(18, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 20</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(19, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 21</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(20, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 22</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(21, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 23</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(22, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 24</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(23, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 25</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(24, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 26</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(25, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 27</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(26, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 28</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(27, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 29</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(28, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 30</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(29, this.value, &#39;series&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">séries</div>
+                    
+                </div></div>
+                </div>
+            </div>
+
+            <!-- Section: Comparaison entre mois -->
+            <div class="card">
+                <div class="card-header" onclick="toggleSection(&#39;comparaisonSection-series&#39;)">
+                    <h2 class="card-title">📊 Comparaison entre mois</h2>
+                    <button class="toggle-btn" id="comparaisonToggle-series">▼</button>
+                </div>
+                <div class="section-content" id="comparaisonSection-series">
+                    <div id="comparaisonTable-series" style="overflow-x:auto; margin-bottom:20px;"><table class="comp-table"><thead><tr><th>Mois</th><th>Total Séries</th><th>Objectif</th><th>% Atteint</th><th>Ranking</th><th>Estimation</th></tr></thead><tbody><tr><td>Janvier 2026</td><td><strong>29</strong></td><td>31</td><td><span class="comp-badge-gray">🔶 94%</span></td><td><span class="comp-rank-3">🥉 3</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Février 2026</td><td><strong>27</strong></td><td>28</td><td><span class="comp-badge-gray">🔶 96%</span></td><td><span class="comp-rank-2">🥈 2</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Mars 2026</td><td><strong>24</strong></td><td>31</td><td><span class="comp-badge-red">❌ 77%</span></td><td><span class="comp-rank-other">6</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Avril 2026</td><td><strong>26</strong></td><td>30</td><td><span class="comp-badge-gray">🔶 87%</span></td><td><span class="comp-rank-other">4</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Mai 2026</td><td><strong>25</strong></td><td>31</td><td><span class="comp-badge-gray">🔶 81%</span></td><td><span class="comp-rank-other">5</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Juin 2026</td><td><strong>31</strong></td><td>30</td><td><span class="comp-badge-green">✅ 103%</span></td><td><span class="comp-rank-1">🥇 1</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Juillet 2026</td><td><strong>24</strong></td><td>31</td><td><span class="comp-badge-red">❌ 77%</span></td><td><span class="comp-rank-other">7</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Août 2026</td><td><strong>15</strong></td><td>31</td><td><span class="comp-badge-red">❌ 48%</span></td><td><span class="comp-rank-other">8</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr style="font-weight:700;"><td>Septembre 2026 🔴</td><td><strong>3</strong></td><td>30</td><td><span class="comp-badge-red">❌ 10%</span></td><td><span class="comp-rank-other">9</span></td><td><span style="font-weight:600;">🔮 🥈 2</span> <span style="margin-left:6px;"><span class="comp-badge-green">✅ 100%</span></span></td></tr></tbody></table></div>
+                    <div id="comparaisonResume-series" style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:20px;">
+                <div class="comp-resume-card"><div class="comp-resume-val">25</div><div class="comp-resume-lbl">Moyenne</div></div>
+                <div class="comp-resume-card"><div class="comp-resume-val" style="color:#dc2626">15</div><div class="comp-resume-lbl">Min — Août</div></div>
+                <div class="comp-resume-card"><div class="comp-resume-val" style="color:#16a34a">31</div><div class="comp-resume-lbl">Max — Juin</div></div>
+                <div class="comp-resume-card"><div class="comp-resume-val">8</div><div class="comp-resume-lbl">Mois suivis</div></div>
+                <div class="comp-resume-card"><div class="comp-resume-val" style="color:#ea580c">83%</div><div class="comp-resume-lbl">Moyenne % Atteint</div></div></div>
+                    <canvas id="comparaisonChart-series" style="box-sizing: border-box; display: block; height: 583px; width: 1167px;" width="1750" height="875"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page: JUMP -->
+        <div id="page-jump" class="page-content" style="">
+            <div class="nav-bar">
+                <div class="nav-title">
+                    <span class="nav-title-icon">🦘</span>
+                    <span id="navCurrentMonth-jump">Septembre 2026</span>
+                </div>
+                <div class="nav-controls">
+                    <button class="nav-btn" onclick="previousMonth(&#39;jump&#39;)">← Précédent</button>
+                    <select class="nav-select" id="monthSelect-jump" onchange="changeMonth(&#39;jump&#39;)">
+                        <option value="0">Janvier</option>
+                        <option value="1">Février</option>
+                        <option value="2">Mars</option>
+                        <option value="3">Avril</option>
+                        <option value="4">Mai</option>
+                        <option value="5">Juin</option>
+                        <option value="6">Juillet</option>
+                        <option value="7">Août</option>
+                        <option value="8">Septembre</option>
+                        <option value="9">Octobre</option>
+                        <option value="10">Novembre</option>
+                        <option value="11">Décembre</option>
+                    </select>
+                    <select class="nav-select" id="yearSelect-jump" onchange="changeYear(&#39;jump&#39;)">
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                        <option value="2028">2028</option>
+                    </select>
+                    <button class="nav-btn" onclick="nextMonth(&#39;jump&#39;)">Suivant →</button>
+                    <button class="nav-today" onclick="goToToday(&#39;jump&#39;)">
+                        <span>●</span> Aujourd'hui
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" onclick="toggleSection(&#39;statsSection-jump&#39;)">
+                    <h2 class="card-title">📊 Statistiques Globales</h2>
+                    <button class="toggle-btn" id="statsToggle-jump">▼</button>
+                </div>
+                <div class="section-content" id="statsSection-jump">
+                    <div class="stats-grid">
+                        <div class="stat-card highlight-total pulsing">
+                            <div class="stat-value" id="totalSeries-jump">6</div>
+                            <div class="stat-label">Jumps Total</div>
+                        </div>
+                        <div class="stat-card trend-stable" id="tendanceCard-jump">
+                            <div class="stat-value">
+                                <span class="trend-arrow stable" id="tendanceArrow-jump">→</span>
+                            </div>
+                            <div class="stat-label">Tendance</div>
+                            <div class="trend-label" id="tendanceLabel-jump">Stable</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="objectifDisplay-jump">30</div>
+                            <div class="stat-label">Objectif</div>
+                        </div>
+                        <div class="stat-card border-success" id="manqueCard-jump">
+                            <div class="stat-value" id="manque-jump">3</div>
+                            <div class="stat-label" id="manqueLabel-jump">En plus</div>
+                        </div>
+                        <div class="stat-card" id="consecutifFaitCard-jump">
+                            <div class="stat-value" id="consecutifFait-jump">6</div>
+                            <div class="stat-label">Consécutif de fait</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="nbreAtteint-jump">3/3</div>
+                            <div class="stat-label">Nbre atteint</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="consecutifZero-jump">0</div>
+                            <div class="stat-label">Consécutifs à 0</div>
+                        </div>
+                        <div class="stat-card border-success" id="moyenneCard-jump">
+                            <div class="stat-value" id="moyenneJournaliere-jump">200%</div>
+                            <div class="stat-label">% / Jours</div>
+                        </div>
+                        <div class="stat-card border-success" id="predictionCard-jump">
+                            <div class="stat-value" id="prediction-jump">60</div>
+                            <div class="stat-label">Prédiction</div>
+                        </div>
+                        <div class="stat-card" id="totalZeroCard-jump">
+                            <div class="stat-value" id="totalZero-jump">0</div>
+                            <div class="stat-label">Total 0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalUn-jump">0</div>
+                            <div class="stat-label">Total 1</div>
+                        </div>
+                        <div class="stat-card" id="totalDeuxCard-jump">
+                            <div class="stat-value" id="totalDeux-jump">3</div>
+                            <div class="stat-label">Total 2</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalTrois-jump">0</div>
+                            <div class="stat-label">Total 3</div>
+                        </div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-header">
+                            <span class="progress-label">Progression vers l'objectif</span>
+                            <span class="progress-value" id="progressText-jump">20%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressBar-jump" style="width: 20%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" onclick="toggleSection(&#39;chartSection-jump&#39;)">
+                    <h2 class="card-title">📈 Graphique de Progression</h2>
+                    <button class="toggle-btn" id="chartToggle-jump">▼</button>
+                </div>
+                <div class="section-content" id="chartSection-jump">
+                    <div class="legend-controls" id="legendControls-jump">
+                        <button class="legend-btn active" onclick="toggleChartSeries(&#39;jump&#39;, &#39;daily&#39;)">
+                            <span class="legend-dot" style="background: #2563eb"></span> Par Jour
+                        </button>
+                        <button class="legend-btn active" onclick="toggleChartSeries(&#39;jump&#39;, &#39;cumulative&#39;)">
+                            <span class="legend-dot" style="background: #7c3aed"></span> Cumulatif
+                        </button>
+                        <button class="legend-btn active" onclick="toggleChartSeries(&#39;jump&#39;, &#39;target&#39;)">
+                            <span class="legend-dot" style="background: #ef4444"></span> Objectif
+                        </button>
+                        <button class="legend-btn active" onclick="toggleChartSeries(&#39;jump&#39;, &#39;prediction&#39;)">
+                            <span class="legend-dot" style="background: #10b981"></span> Prédiction
+                        </button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="progressChart-jump" width="0" style="max-height: 330px; height: 0px; width: 0px; display: block; box-sizing: border-box;" height="0"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" onclick="toggleSection(&#39;daysSection-jump&#39;)">
+                    <h2 class="card-title">🦘 Jumps par Jour</h2>
+                    <button class="toggle-btn" id="daysToggle-jump">▼</button>
+                </div>
+                <div class="section-content" id="daysSection-jump">
+                    <div class="days-grid" id="daysGrid-jump"><div class="day-card has-value streak-2" data-streak-days="1" data-streak-total="2">
+                    <div class="day-number">Jour 1</div>
+                    <input type="number" value="2" min="0" onchange="updateDaySeries(0, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    <div class="streak-badge">Série faible · 2</div>
+                </div><div class="day-card has-value streak-4" data-streak-days="2" data-streak-total="4">
+                    <div class="day-number">Jour 2</div>
+                    <input type="number" value="2" min="0" onchange="updateDaySeries(1, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    <div class="streak-badge">Série faible · 4</div>
+                </div><div class="day-card today has-value streak-6" data-streak-days="3" data-streak-total="6">
+                    <div class="day-number">Jour 3</div>
+                    <input type="number" value="2" min="0" onchange="updateDaySeries(2, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    <div class="streak-badge">Série moyenne · 6</div>
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 4</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(3, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 5</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(4, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 6</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(5, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 7</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(6, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 8</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(7, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 9</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(8, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 10</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(9, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 11</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(10, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 12</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(11, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 13</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(12, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 14</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(13, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 15</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(14, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 16</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(15, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 17</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(16, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 18</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(17, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 19</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(18, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 20</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(19, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 21</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(20, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 22</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(21, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 23</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(22, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 24</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(23, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 25</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(24, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 26</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(25, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 27</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(26, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 28</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(27, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 29</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(28, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 30</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(29, this.value, &#39;jump&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jumps</div>
+                    
+                </div></div>
+                </div>
+            </div>
+
+            <!-- Section: Comparaison entre mois -->
+            <div class="card">
+                <div class="card-header" onclick="toggleSection(&#39;comparaisonSection-jump&#39;)">
+                    <h2 class="card-title">📊 Comparaison entre mois</h2>
+                    <button class="toggle-btn" id="comparaisonToggle-jump">▼</button>
+                </div>
+                <div class="section-content" id="comparaisonSection-jump">
+                    <div id="comparaisonTable-jump" style="overflow-x:auto; margin-bottom:20px;"><table class="comp-table"><thead><tr><th>Mois</th><th>Total Jumps</th><th>Objectif</th><th>% Atteint</th><th>Ranking</th><th>Estimation</th></tr></thead><tbody><tr><td>Janvier 2026</td><td><strong>27</strong></td><td>31</td><td><span class="comp-badge-gray">🔶 87%</span></td><td><span class="comp-rank-other">6</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Février 2026</td><td><strong>33</strong></td><td>28</td><td><span class="comp-badge-green">✅ 118%</span></td><td><span class="comp-rank-2">🥈 2</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Mars 2026</td><td><strong>31</strong></td><td>31</td><td><span class="comp-badge-green">✅ 100%</span></td><td><span class="comp-rank-3">🥉 3</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Avril 2026</td><td><strong>30</strong></td><td>30</td><td><span class="comp-badge-green">✅ 100%</span></td><td><span class="comp-rank-other">4</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Mai 2026</td><td><strong>31</strong></td><td>31</td><td><span class="comp-badge-green">✅ 100%</span></td><td><span class="comp-rank-other">5</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Juin 2026</td><td><strong>36</strong></td><td>30</td><td><span class="comp-badge-green">✅ 120%</span></td><td><span class="comp-rank-1">🥇 1</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Juillet 2026</td><td><strong>26</strong></td><td>31</td><td><span class="comp-badge-gray">🔶 84%</span></td><td><span class="comp-rank-other">7</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Août 2026</td><td><strong>17</strong></td><td>31</td><td><span class="comp-badge-red">❌ 55%</span></td><td><span class="comp-rank-other">8</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr style="font-weight:700;"><td>Septembre 2026 🔴</td><td><strong>6</strong></td><td>30</td><td><span class="comp-badge-red">❌ 20%</span></td><td><span class="comp-rank-other">9</span></td><td><span style="font-weight:600;">🔮 🥇 1</span> <span style="margin-left:6px;"><span class="comp-badge-green">✅ 200%</span></span></td></tr></tbody></table></div>
+                    <div id="comparaisonResume-jump" style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:20px;">
+                <div class="comp-resume-card"><div class="comp-resume-val">29</div><div class="comp-resume-lbl">Moyenne</div></div>
+                <div class="comp-resume-card"><div class="comp-resume-val" style="color:#dc2626">17</div><div class="comp-resume-lbl">Min — Août</div></div>
+                <div class="comp-resume-card"><div class="comp-resume-val" style="color:#16a34a">36</div><div class="comp-resume-lbl">Max — Juin</div></div>
+                <div class="comp-resume-card"><div class="comp-resume-val">8</div><div class="comp-resume-lbl">Mois suivis</div></div>
+                <div class="comp-resume-card"><div class="comp-resume-val" style="color:#ea580c">96%</div><div class="comp-resume-lbl">Moyenne % Atteint</div></div></div>
+                    <canvas id="comparaisonChart-jump" width="0" height="0" style="display: block; box-sizing: border-box; height: 0px; width: 0px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page: 10000 PAS -->
+        <div id="page-pas" class="page-content" style="">
+            <div class="nav-bar">
+                <div class="nav-title">
+                    <span class="nav-title-icon">🚶</span>
+                    <span id="navCurrentMonth-pas">Septembre 2026</span>
+                </div>
+                <div class="nav-controls">
+                    <button class="nav-btn" onclick="previousMonth(&#39;pas&#39;)">← Précédent</button>
+                    <select class="nav-select" id="monthSelect-pas" onchange="changeMonth(&#39;pas&#39;)">
+                        <option value="0">Janvier</option>
+                        <option value="1">Février</option>
+                        <option value="2">Mars</option>
+                        <option value="3">Avril</option>
+                        <option value="4">Mai</option>
+                        <option value="5">Juin</option>
+                        <option value="6">Juillet</option>
+                        <option value="7">Août</option>
+                        <option value="8">Septembre</option>
+                        <option value="9">Octobre</option>
+                        <option value="10">Novembre</option>
+                        <option value="11">Décembre</option>
+                    </select>
+                    <select class="nav-select" id="yearSelect-pas" onchange="changeYear(&#39;pas&#39;)">
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                        <option value="2028">2028</option>
+                    </select>
+                    <button class="nav-btn" onclick="nextMonth(&#39;pas&#39;)">Suivant →</button>
+                    <button class="nav-today" onclick="goToToday(&#39;pas&#39;)">
+                        <span>●</span> Aujourd'hui
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" onclick="toggleSection(&#39;statsSection-pas&#39;)">
+                    <h2 class="card-title">📊 Statistiques Globales</h2>
+                    <button class="toggle-btn" id="statsToggle-pas">▼</button>
+                </div>
+                <div class="section-content" id="statsSection-pas">
+                    <div class="stats-grid">
+                        <div class="stat-card highlight-total pulsing">
+                            <div class="stat-value" id="totalSeries-pas">0</div>
+                            <div class="stat-label">Pas Total</div>
+                        </div>
+                        <div class="stat-card trend-stable" id="tendanceCard-pas">
+                            <div class="stat-value">
+                                <span class="trend-arrow stable" id="tendanceArrow-pas">→</span>
+                            </div>
+                            <div class="stat-label">Tendance</div>
+                            <div class="trend-label" id="tendanceLabel-pas">Stable</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="objectifDisplay-pas">8</div>
+                            <div class="stat-label">Objectif</div>
+                        </div>
+                        <div class="stat-card border-danger" id="manqueCard-pas">
+                            <div class="stat-value" id="manque-pas">1</div>
+                            <div class="stat-label" id="manqueLabel-pas">Manque</div>
+                        </div>
+                        <div class="stat-card" id="consecutifFaitCard-pas">
+                            <div class="stat-value" id="consecutifFait-pas">0</div>
+                            <div class="stat-label">Consécutif de fait</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="nbreAtteint-pas">0/3</div>
+                            <div class="stat-label">Nbre atteint</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="consecutifZero-pas">3</div>
+                            <div class="stat-label">Consécutifs à 0</div>
+                        </div>
+                        <div class="stat-card border-danger" id="moyenneCard-pas">
+                            <div class="stat-value" id="moyenneJournaliere-pas">0%</div>
+                            <div class="stat-label">% / Jours</div>
+                        </div>
+                        <div class="stat-card border-danger" id="predictionCard-pas">
+                            <div class="stat-value" id="prediction-pas">0</div>
+                            <div class="stat-label">Prédiction</div>
+                        </div>
+                        <div class="stat-card" id="totalZeroCard-pas">
+                            <div class="stat-value" id="totalZero-pas">3</div>
+                            <div class="stat-label">Total 0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalUn-pas">0</div>
+                            <div class="stat-label">Total 1</div>
+                        </div>
+                        <div class="stat-card" id="totalDeuxCard-pas">
+                            <div class="stat-value" id="totalDeux-pas">0</div>
+                            <div class="stat-label">Total 2</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalTrois-pas">0</div>
+                            <div class="stat-label">Total 3</div>
+                        </div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-header">
+                            <span class="progress-label">Progression vers l'objectif</span>
+                            <span class="progress-value" id="progressText-pas">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill warning" id="progressBar-pas" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" onclick="toggleSection(&#39;chartSection-pas&#39;)">
+                    <h2 class="card-title">📈 Graphique de Progression</h2>
+                    <button class="toggle-btn" id="chartToggle-pas">▼</button>
+                </div>
+                <div class="section-content" id="chartSection-pas">
+                    <div class="legend-controls" id="legendControls-pas">
+                        <button class="legend-btn active" onclick="toggleChartSeries(&#39;pas&#39;, &#39;daily&#39;)">
+                            <span class="legend-dot" style="background: #2563eb"></span> Par Jour
+                        </button>
+                        <button class="legend-btn active" onclick="toggleChartSeries(&#39;pas&#39;, &#39;cumulative&#39;)">
+                            <span class="legend-dot" style="background: #7c3aed"></span> Cumulatif
+                        </button>
+                        <button class="legend-btn active" onclick="toggleChartSeries(&#39;pas&#39;, &#39;target&#39;)">
+                            <span class="legend-dot" style="background: #ef4444"></span> Objectif
+                        </button>
+                        <button class="legend-btn active" onclick="toggleChartSeries(&#39;pas&#39;, &#39;prediction&#39;)">
+                            <span class="legend-dot" style="background: #10b981"></span> Prédiction
+                        </button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="progressChart-pas" width="0" style="max-height: 330px; height: 0px; width: 0px; display: block; box-sizing: border-box;" height="0"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" onclick="toggleSection(&#39;daysSection-pas&#39;)">
+                    <h2 class="card-title">🚶 10 000 Pas par Jour</h2>
+                    <button class="toggle-btn" id="daysToggle-pas">▼</button>
+                </div>
+                <div class="section-content" id="daysSection-pas">
+                    <div class="days-grid" id="daysGrid-pas"><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 1</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(0, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 2</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(1, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div><div class="day-card today" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 3</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(2, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 4</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(3, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 5</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(4, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 6</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(5, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 7</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(6, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 8</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(7, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 9</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(8, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 10</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(9, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 11</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(10, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 12</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(11, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 13</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(12, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 14</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(13, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 15</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(14, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 16</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(15, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 17</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(16, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 18</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(17, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 19</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(18, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 20</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(19, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 21</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(20, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 22</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(21, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 23</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(22, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 24</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(23, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 25</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(24, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 26</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(25, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 27</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(26, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 28</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(27, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 29</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(28, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 30</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(29, this.value, &#39;pas&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">pas</div>
+                    
+                </div></div>
+                </div>
+            </div>
+
+            <!-- Section: Comparaison entre mois -->
+            <div class="card">
+                <div class="card-header" onclick="toggleSection(&#39;comparaisonSection-pas&#39;)">
+                    <h2 class="card-title">📊 Comparaison entre mois</h2>
+                    <button class="toggle-btn" id="comparaisonToggle-pas">▼</button>
+                </div>
+                <div class="section-content" id="comparaisonSection-pas">
+                    <div id="comparaisonTable-pas" style="overflow-x:auto; margin-bottom:20px;"><table class="comp-table"><thead><tr><th>Mois</th><th>Total 10 000 Pas</th><th>Objectif</th><th>% Atteint</th><th>Ranking</th><th>Estimation</th></tr></thead><tbody><tr><td>Janvier 2026</td><td><strong>7</strong></td><td>8</td><td><span class="comp-badge-gray">🔶 88%</span></td><td><span class="comp-rank-other">7</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Février 2026</td><td><strong>5</strong></td><td>8</td><td><span class="comp-badge-red">❌ 63%</span></td><td><span class="comp-rank-other">8</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Mars 2026</td><td><strong>9</strong></td><td>8</td><td><span class="comp-badge-green">✅ 113%</span></td><td><span class="comp-rank-other">6</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Avril 2026</td><td><strong>14</strong></td><td>8</td><td><span class="comp-badge-green">✅ 175%</span></td><td><span class="comp-rank-2">🥈 2</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Mai 2026</td><td><strong>13</strong></td><td>8</td><td><span class="comp-badge-green">✅ 163%</span></td><td><span class="comp-rank-3">🥉 3</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Juin 2026</td><td><strong>11</strong></td><td>8</td><td><span class="comp-badge-green">✅ 138%</span></td><td><span class="comp-rank-other">4</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Juillet 2026</td><td><strong>11</strong></td><td>8</td><td><span class="comp-badge-green">✅ 138%</span></td><td><span class="comp-rank-other">5</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Août 2026</td><td><strong>18</strong></td><td>8</td><td><span class="comp-badge-green">✅ 225%</span></td><td><span class="comp-rank-1">🥇 1</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr style="font-weight:700;"><td>Septembre 2026 🔴</td><td><strong>0</strong></td><td>8</td><td><span class="comp-badge-red">❌ 0%</span></td><td><span class="comp-rank-other">9</span></td><td><span style="font-weight:600;">🔮 9</span> <span style="margin-left:6px;"><span class="comp-badge-red">❌ 0%</span></span></td></tr></tbody></table></div>
+                    <div id="comparaisonResume-pas" style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:20px;">
+                <div class="comp-resume-card"><div class="comp-resume-val">11</div><div class="comp-resume-lbl">Moyenne</div></div>
+                <div class="comp-resume-card"><div class="comp-resume-val" style="color:#dc2626">5</div><div class="comp-resume-lbl">Min — Février</div></div>
+                <div class="comp-resume-card"><div class="comp-resume-val" style="color:#16a34a">18</div><div class="comp-resume-lbl">Max — Août</div></div>
+                <div class="comp-resume-card"><div class="comp-resume-val">8</div><div class="comp-resume-lbl">Mois suivis</div></div>
+                <div class="comp-resume-card"><div class="comp-resume-val" style="color:#16a34a">138%</div><div class="comp-resume-lbl">Moyenne % Atteint</div></div></div>
+                    <canvas id="comparaisonChart-pas" width="0" height="0" style="display: block; box-sizing: border-box; height: 0px; width: 0px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page: JOGGING -->
+        <div id="page-jogging" class="page-content" style="">
+            <div class="nav-bar">
+                <div class="nav-title">
+                    <span class="nav-title-icon">🏃</span>
+                    <span id="navCurrentMonth-jogging">Septembre 2026</span>
+                </div>
+                <div class="nav-controls">
+                    <button class="nav-btn" onclick="previousMonth(&#39;jogging&#39;)">← Précédent</button>
+                    <select class="nav-select" id="monthSelect-jogging" onchange="changeMonth(&#39;jogging&#39;)">
+                        <option value="0">Janvier</option>
+                        <option value="1">Février</option>
+                        <option value="2">Mars</option>
+                        <option value="3">Avril</option>
+                        <option value="4">Mai</option>
+                        <option value="5">Juin</option>
+                        <option value="6">Juillet</option>
+                        <option value="7">Août</option>
+                        <option value="8">Septembre</option>
+                        <option value="9">Octobre</option>
+                        <option value="10">Novembre</option>
+                        <option value="11">Décembre</option>
+                    </select>
+                    <select class="nav-select" id="yearSelect-jogging" onchange="changeYear(&#39;jogging&#39;)">
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                        <option value="2028">2028</option>
+                    </select>
+                    <button class="nav-btn" onclick="nextMonth(&#39;jogging&#39;)">Suivant →</button>
+                    <button class="nav-today" onclick="goToToday(&#39;jogging&#39;)">
+                        <span>●</span> Aujourd'hui
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" onclick="toggleSection(&#39;statsSection-jogging&#39;)">
+                    <h2 class="card-title">📊 Statistiques Globales</h2>
+                    <button class="toggle-btn" id="statsToggle-jogging">▼</button>
+                </div>
+                <div class="section-content" id="statsSection-jogging">
+                    <div class="stats-grid">
+                        <div class="stat-card highlight-total pulsing">
+                            <div class="stat-value" id="totalSeries-jogging">0</div>
+                            <div class="stat-label">Jogging Total</div>
+                        </div>
+                        <div class="stat-card trend-stable" id="tendanceCard-jogging">
+                            <div class="stat-value">
+                                <span class="trend-arrow stable" id="tendanceArrow-jogging">→</span>
+                            </div>
+                            <div class="stat-label">Tendance</div>
+                            <div class="trend-label" id="tendanceLabel-jogging">Stable</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="objectifDisplay-jogging">4</div>
+                            <div class="stat-label">Objectif</div>
+                        </div>
+                        <div class="stat-card" id="manqueCard-jogging">
+                            <div class="stat-value" id="manque-jogging">0</div>
+                            <div class="stat-label" id="manqueLabel-jogging">Manque</div>
+                        </div>
+                        <div class="stat-card" id="consecutifFaitCard-jogging">
+                            <div class="stat-value" id="consecutifFait-jogging">0</div>
+                            <div class="stat-label">Consécutif de fait</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="nbreAtteint-jogging">0/3</div>
+                            <div class="stat-label">Nbre atteint</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="consecutifZero-jogging">3</div>
+                            <div class="stat-label">Consécutifs à 0</div>
+                        </div>
+                        <div class="stat-card border-danger" id="moyenneCard-jogging">
+                            <div class="stat-value" id="moyenneJournaliere-jogging">0%</div>
+                            <div class="stat-label">% / Jours</div>
+                        </div>
+                        <div class="stat-card border-danger" id="predictionCard-jogging">
+                            <div class="stat-value" id="prediction-jogging">0</div>
+                            <div class="stat-label">Prédiction</div>
+                        </div>
+                        <div class="stat-card" id="totalZeroCard-jogging">
+                            <div class="stat-value" id="totalZero-jogging">3</div>
+                            <div class="stat-label">Total 0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalUn-jogging">0</div>
+                            <div class="stat-label">Total 1</div>
+                        </div>
+                        <div class="stat-card" id="totalDeuxCard-jogging">
+                            <div class="stat-value" id="totalDeux-jogging">0</div>
+                            <div class="stat-label">Total 2</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalTrois-jogging">0</div>
+                            <div class="stat-label">Total 3</div>
+                        </div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-header">
+                            <span class="progress-label">Progression vers l'objectif</span>
+                            <span class="progress-value" id="progressText-jogging">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill warning" id="progressBar-jogging" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" onclick="toggleSection(&#39;chartSection-jogging&#39;)">
+                    <h2 class="card-title">📈 Graphique de Progression</h2>
+                    <button class="toggle-btn" id="chartToggle-jogging">▼</button>
+                </div>
+                <div class="section-content" id="chartSection-jogging">
+                    <div class="legend-controls" id="legendControls-jogging">
+                        <button class="legend-btn active" onclick="toggleChartSeries(&#39;jogging&#39;, &#39;daily&#39;)">
+                            <span class="legend-dot" style="background: #2563eb"></span> Par Jour
+                        </button>
+                        <button class="legend-btn active" onclick="toggleChartSeries(&#39;jogging&#39;, &#39;cumulative&#39;)">
+                            <span class="legend-dot" style="background: #7c3aed"></span> Cumulatif
+                        </button>
+                        <button class="legend-btn active" onclick="toggleChartSeries(&#39;jogging&#39;, &#39;target&#39;)">
+                            <span class="legend-dot" style="background: #ef4444"></span> Objectif
+                        </button>
+                        <button class="legend-btn active" onclick="toggleChartSeries(&#39;jogging&#39;, &#39;prediction&#39;)">
+                            <span class="legend-dot" style="background: #10b981"></span> Prédiction
+                        </button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="progressChart-jogging" width="0" style="max-height: 330px; height: 0px; width: 0px; display: block; box-sizing: border-box;" height="0"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" onclick="toggleSection(&#39;daysSection-jogging&#39;)">
+                    <h2 class="card-title">🏃 Jogging par Jour</h2>
+                    <button class="toggle-btn" id="daysToggle-jogging">▼</button>
+                </div>
+                <div class="section-content" id="daysSection-jogging">
+                    <div class="days-grid" id="daysGrid-jogging"><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 1</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(0, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 2</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(1, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div><div class="day-card today" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 3</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(2, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 4</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(3, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 5</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(4, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 6</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(5, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 7</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(6, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 8</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(7, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 9</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(8, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 10</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(9, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 11</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(10, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 12</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(11, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 13</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(12, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 14</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(13, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 15</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(14, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 16</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(15, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 17</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(16, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 18</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(17, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 19</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(18, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 20</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(19, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 21</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(20, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 22</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(21, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 23</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(22, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 24</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(23, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 25</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(24, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 26</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(25, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 27</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(26, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 28</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(27, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 29</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(28, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 30</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(29, this.value, &#39;jogging&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">jogging</div>
+                    
+                </div></div>
+                </div>
+            </div>
+
+            <!-- Section: Comparaison entre mois -->
+            <div class="card">
+                <div class="card-header" onclick="toggleSection(&#39;comparaisonSection-jogging&#39;)">
+                    <h2 class="card-title">📊 Comparaison entre mois</h2>
+                    <button class="toggle-btn" id="comparaisonToggle-jogging">▼</button>
+                </div>
+                <div class="section-content" id="comparaisonSection-jogging">
+                    <div id="comparaisonTable-jogging" style="overflow-x:auto; margin-bottom:20px;"><table class="comp-table"><thead><tr><th>Mois</th><th>Total Jogging</th><th>Objectif</th><th>% Atteint</th><th>Ranking</th><th>Estimation</th></tr></thead><tbody><tr><td>Janvier 2026</td><td><strong>2</strong></td><td>4</td><td><span class="comp-badge-red">❌ 50%</span></td><td><span class="comp-rank-2">🥈 2</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Février 2026</td><td><strong>2</strong></td><td>4</td><td><span class="comp-badge-red">❌ 50%</span></td><td><span class="comp-rank-3">🥉 3</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Mars 2026</td><td><strong>5</strong></td><td>4</td><td><span class="comp-badge-green">✅ 125%</span></td><td><span class="comp-rank-1">🥇 1</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Avril 2026</td><td><strong>0</strong></td><td>4</td><td><span class="comp-badge-red">❌ 0%</span></td><td><span class="comp-rank-other">4</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Mai 2026</td><td><strong>0</strong></td><td>4</td><td><span class="comp-badge-red">❌ 0%</span></td><td><span class="comp-rank-other">5</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Juin 2026</td><td><strong>0</strong></td><td>4</td><td><span class="comp-badge-red">❌ 0%</span></td><td><span class="comp-rank-other">6</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Juillet 2026</td><td><strong>0</strong></td><td>4</td><td><span class="comp-badge-red">❌ 0%</span></td><td><span class="comp-rank-other">7</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Août 2026</td><td><strong>0</strong></td><td>4</td><td><span class="comp-badge-red">❌ 0%</span></td><td><span class="comp-rank-other">8</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr style="font-weight:700;"><td>Septembre 2026 🔴</td><td><strong>0</strong></td><td>4</td><td><span class="comp-badge-red">❌ 0%</span></td><td><span class="comp-rank-other">9</span></td><td><span style="font-weight:600;">🔮 4</span> <span style="margin-left:6px;"><span class="comp-badge-red">❌ 0%</span></span></td></tr></tbody></table></div>
+                    <div id="comparaisonResume-jogging" style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:20px;">
+                <div class="comp-resume-card"><div class="comp-resume-val">1</div><div class="comp-resume-lbl">Moyenne</div></div>
+                <div class="comp-resume-card"><div class="comp-resume-val" style="color:#dc2626">0</div><div class="comp-resume-lbl">Min — Avril</div></div>
+                <div class="comp-resume-card"><div class="comp-resume-val" style="color:#16a34a">5</div><div class="comp-resume-lbl">Max — Mars</div></div>
+                <div class="comp-resume-card"><div class="comp-resume-val">8</div><div class="comp-resume-lbl">Mois suivis</div></div>
+                <div class="comp-resume-card"><div class="comp-resume-val" style="color:#dc2626">28%</div><div class="comp-resume-lbl">Moyenne % Atteint</div></div></div>
+                    <canvas id="comparaisonChart-jogging" width="0" height="0" style="display: block; box-sizing: border-box; height: 0px; width: 0px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page: NATATION -->
+        <div id="page-natation" class="page-content" style="">
+            <div class="nav-bar">
+                <div class="nav-title">
+                    <span class="nav-title-icon">🏊</span>
+                    <span id="navCurrentMonth-natation">Septembre 2026</span>
+                </div>
+                <div class="nav-controls">
+                    <button class="nav-btn" onclick="previousMonth(&#39;natation&#39;)">← Précédent</button>
+                    <select class="nav-select" id="monthSelect-natation" onchange="changeMonth(&#39;natation&#39;)">
+                        <option value="0">Janvier</option>
+                        <option value="1">Février</option>
+                        <option value="2">Mars</option>
+                        <option value="3">Avril</option>
+                        <option value="4">Mai</option>
+                        <option value="5">Juin</option>
+                        <option value="6">Juillet</option>
+                        <option value="7">Août</option>
+                        <option value="8">Septembre</option>
+                        <option value="9">Octobre</option>
+                        <option value="10">Novembre</option>
+                        <option value="11">Décembre</option>
+                    </select>
+                    <select class="nav-select" id="yearSelect-natation" onchange="changeYear(&#39;natation&#39;)">
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                        <option value="2028">2028</option>
+                    </select>
+                    <button class="nav-btn" onclick="nextMonth(&#39;natation&#39;)">Suivant →</button>
+                    <button class="nav-today" onclick="goToToday(&#39;natation&#39;)">
+                        <span>●</span> Aujourd'hui
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" onclick="toggleSection(&#39;statsSection-natation&#39;)">
+                    <h2 class="card-title">📊 Statistiques Globales</h2>
+                    <button class="toggle-btn" id="statsToggle-natation">▼</button>
+                </div>
+                <div class="section-content" id="statsSection-natation">
+                    <div class="stats-grid">
+                        <div class="stat-card highlight-total pulsing">
+                            <div class="stat-value" id="totalSeries-natation">0</div>
+                            <div class="stat-label">Natation Total</div>
+                        </div>
+                        <div class="stat-card trend-stable" id="tendanceCard-natation">
+                            <div class="stat-value">
+                                <span class="trend-arrow stable" id="tendanceArrow-natation">→</span>
+                            </div>
+                            <div class="stat-label">Tendance</div>
+                            <div class="trend-label" id="tendanceLabel-natation">Stable</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="objectif-editable">
+                                <div class="objectif-controls">
+                                    <button class="objectif-btn" onclick="changeNatationObjectif(-1)" title="Diminuer l&#39;objectif">−</button>
+                                    <div class="stat-value" id="objectifDisplay-natation">4</div>
+                                    <button class="objectif-btn" onclick="changeNatationObjectif(1)" title="Augmenter l&#39;objectif">+</button>
+                                </div>
+                                <div class="stat-label">Objectif</div>
+                            </div>
+                        </div>
+                        <div class="stat-card" id="manqueCard-natation">
+                            <div class="stat-value" id="manque-natation">0</div>
+                            <div class="stat-label" id="manqueLabel-natation">Manque</div>
+                        </div>
+                        <div class="stat-card" id="consecutifFaitCard-natation">
+                            <div class="stat-value" id="consecutifFait-natation">0</div>
+                            <div class="stat-label">Consécutif de fait</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="nbreAtteint-natation">0/3</div>
+                            <div class="stat-label">Nbre atteint</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="consecutifZero-natation">3</div>
+                            <div class="stat-label">Consécutifs à 0</div>
+                        </div>
+                        <div class="stat-card border-danger" id="moyenneCard-natation">
+                            <div class="stat-value" id="moyenneJournaliere-natation">0%</div>
+                            <div class="stat-label">% / Jours</div>
+                        </div>
+                        <div class="stat-card border-danger" id="predictionCard-natation">
+                            <div class="stat-value" id="prediction-natation">0</div>
+                            <div class="stat-label">Prédiction</div>
+                        </div>
+                        <div class="stat-card" id="totalZeroCard-natation">
+                            <div class="stat-value" id="totalZero-natation">3</div>
+                            <div class="stat-label">Total 0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalUn-natation">0</div>
+                            <div class="stat-label">Total 1</div>
+                        </div>
+                        <div class="stat-card" id="totalDeuxCard-natation">
+                            <div class="stat-value" id="totalDeux-natation">0</div>
+                            <div class="stat-label">Total 2</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalTrois-natation">0</div>
+                            <div class="stat-label">Total 3</div>
+                        </div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-header">
+                            <span class="progress-label">Progression vers l'objectif</span>
+                            <span class="progress-value" id="progressText-natation">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill warning" id="progressBar-natation" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" onclick="toggleSection(&#39;chartSection-natation&#39;)">
+                    <h2 class="card-title">📈 Graphique de Progression</h2>
+                    <button class="toggle-btn" id="chartToggle-natation">▼</button>
+                </div>
+                <div class="section-content" id="chartSection-natation">
+                    <div class="legend-controls" id="legendControls-natation">
+                        <button class="legend-btn active" onclick="toggleChartSeries(&#39;natation&#39;, &#39;daily&#39;)">
+                            <span class="legend-dot" style="background: #2563eb"></span> Par Jour
+                        </button>
+                        <button class="legend-btn active" onclick="toggleChartSeries(&#39;natation&#39;, &#39;cumulative&#39;)">
+                            <span class="legend-dot" style="background: #7c3aed"></span> Cumulatif
+                        </button>
+                        <button class="legend-btn active" onclick="toggleChartSeries(&#39;natation&#39;, &#39;target&#39;)">
+                            <span class="legend-dot" style="background: #ef4444"></span> Objectif
+                        </button>
+                        <button class="legend-btn active" onclick="toggleChartSeries(&#39;natation&#39;, &#39;prediction&#39;)">
+                            <span class="legend-dot" style="background: #10b981"></span> Prédiction
+                        </button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="progressChart-natation" width="1720" style="max-height: 330px; height: 330px; width: 1147px; display: block; box-sizing: border-box;" height="495"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" onclick="toggleSection(&#39;daysSection-natation&#39;)">
+                    <h2 class="card-title">🏊 Natation par Jour</h2>
+                    <button class="toggle-btn" id="daysToggle-natation">▼</button>
+                </div>
+                <div class="section-content" id="daysSection-natation">
+                    <div class="days-grid" id="daysGrid-natation"><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 1</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(0, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 2</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(1, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div><div class="day-card today" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 3</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(2, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 4</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(3, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 5</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(4, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 6</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(5, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 7</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(6, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 8</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(7, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 9</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(8, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 10</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(9, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 11</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(10, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 12</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(11, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 13</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(12, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 14</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(13, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 15</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(14, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 16</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(15, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 17</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(16, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 18</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(17, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 19</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(18, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 20</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(19, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 21</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(20, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 22</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(21, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 23</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(22, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 24</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(23, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 25</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(24, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 26</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(25, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 27</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(26, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 28</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(27, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 29</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(28, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 30</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(29, this.value, &#39;natation&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Nage</div>
+                    
+                </div></div>
+                </div>
+            </div>
+
+            <!-- Section: Comparaison entre mois -->
+            <div class="card">
+                <div class="card-header" onclick="toggleSection(&#39;comparaisonSection-natation&#39;)">
+                    <h2 class="card-title">📊 Comparaison entre mois</h2>
+                    <button class="toggle-btn" id="comparaisonToggle-natation">▼</button>
+                </div>
+                <div class="section-content" id="comparaisonSection-natation">
+                    <div id="comparaisonTable-natation" style="overflow-x:auto; margin-bottom:20px;"><div class="comp-option-banner">⚙️ Option n active : natation valable qu'à partir de juin — statistiques calculées sur les mois de juin à décembre uniquement</div><table class="comp-table"><thead><tr><th>Mois</th><th>Total Natation</th><th>Objectif</th><th>% Atteint</th><th>Ranking</th><th>Estimation</th></tr></thead><tbody><tr><td>Janvier 2026</td><td><strong>0</strong></td><td>0</td><td><span class="comp-badge-red">❌ 0%</span></td><td><span class="comp-rank-other">4</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Février 2026</td><td><strong>0</strong></td><td>0</td><td><span class="comp-badge-red">❌ 0%</span></td><td><span class="comp-rank-other">5</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Mars 2026</td><td><strong>0</strong></td><td>0</td><td><span class="comp-badge-red">❌ 0%</span></td><td><span class="comp-rank-other">6</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Avril 2026</td><td><strong>0</strong></td><td>0</td><td><span class="comp-badge-red">❌ 0%</span></td><td><span class="comp-rank-other">7</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Mai 2026</td><td><strong>0</strong></td><td>0</td><td><span class="comp-badge-red">❌ 0%</span></td><td><span class="comp-rank-other">8</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Juin 2026</td><td><strong>4</strong></td><td>4</td><td><span class="comp-badge-green">✅ 100%</span></td><td><span class="comp-rank-3">🥉 3</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Juillet 2026</td><td><strong>11</strong></td><td>8</td><td><span class="comp-badge-green">✅ 138%</span></td><td><span class="comp-rank-2">🥈 2</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Août 2026</td><td><strong>13</strong></td><td>8</td><td><span class="comp-badge-green">✅ 163%</span></td><td><span class="comp-rank-1">🥇 1</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr style="font-weight:700;"><td>Septembre 2026 🔴</td><td><strong>0</strong></td><td>4</td><td><span class="comp-badge-red">❌ 0%</span></td><td><span class="comp-rank-other">9</span></td><td><span style="font-weight:600;">🔮 4</span> <span style="margin-left:6px;"><span class="comp-badge-red">❌ 0%</span></span></td></tr></tbody></table></div>
+                    <div id="comparaisonResume-natation" style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:20px;">
+                <div class="comp-resume-card"><div class="comp-resume-val">9</div><div class="comp-resume-lbl">Moyenne</div></div>
+                <div class="comp-resume-card"><div class="comp-resume-val" style="color:#dc2626">4</div><div class="comp-resume-lbl">Min — Juin</div></div>
+                <div class="comp-resume-card"><div class="comp-resume-val" style="color:#16a34a">13</div><div class="comp-resume-lbl">Max — Août</div></div>
+                <div class="comp-resume-card"><div class="comp-resume-val">3</div><div class="comp-resume-lbl">Mois suivis (juin→déc.)</div></div>
+                <div class="comp-resume-card"><div class="comp-resume-val" style="color:#16a34a">134%</div><div class="comp-resume-lbl">Moyenne % Atteint</div></div></div>
+                    <canvas id="comparaisonChart-natation" style="box-sizing: border-box; display: block; height: 583px; width: 1167px;" width="1750" height="875"></canvas>
+                </div>
+            </div>
+        </div>
+
+<div id="page-corde" class="page-content active" style="">
+            <div class="nav-bar">
+                <div class="nav-title">
+                    <span class="nav-title-icon">🪢</span>
+                    <span id="navCurrentMonth-corde">Septembre 2026</span>
+                </div>
+                <div class="nav-controls">
+                    <button class="nav-btn" onclick="previousMonth(&#39;corde&#39;)">← Précédent</button>
+                    <select class="nav-select" id="monthSelect-corde" onchange="changeMonth(&#39;corde&#39;)">
+                        <option value="0">Janvier</option>
+                        <option value="1">Février</option>
+                        <option value="2">Mars</option>
+                        <option value="3">Avril</option>
+                        <option value="4">Mai</option>
+                        <option value="5">Juin</option>
+                        <option value="6">Juillet</option>
+                        <option value="7">Août</option>
+                        <option value="8">Septembre</option>
+                        <option value="9">Octobre</option>
+                        <option value="10">Novembre</option>
+                        <option value="11">Décembre</option>
+                    </select>
+                    <select class="nav-select" id="yearSelect-corde" onchange="changeYear(&#39;corde&#39;)">
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                        <option value="2028">2028</option>
+                    </select>
+                    <button class="nav-btn" onclick="nextMonth(&#39;corde&#39;)">Suivant →</button>
+                    <button class="nav-today" onclick="goToToday(&#39;corde&#39;)">
+                        <span>●</span> Aujourd'hui
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" onclick="toggleSection(&#39;statsSection-corde&#39;)">
+                    <h2 class="card-title">📊 Statistiques Globales</h2>
+                    <button class="toggle-btn" id="statsToggle-corde">▼</button>
+                </div>
+                <div class="section-content" id="statsSection-corde">
+                    <div class="stats-grid">
+                        <div class="stat-card highlight-total pulsing">
+                            <div class="stat-value" id="totalSeries-corde">1</div>
+                            <div class="stat-label">Corde à Sauter Total</div>
+                        </div>
+                        <div class="stat-card trend-down" id="tendanceCard-corde">
+                            <div class="stat-value">
+                                <span class="trend-arrow down" id="tendanceArrow-corde">↘</span>
+                            </div>
+                            <div class="stat-label">Tendance</div>
+                            <div class="trend-label" id="tendanceLabel-corde">Décroissante</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="objectif-editable">
+                                <div class="objectif-controls">
+                                    <button class="objectif-btn" onclick="changeCordeObjectif(-1)" title="Diminuer l&#39;objectif">−</button>
+                                    <div class="stat-value" id="objectifDisplay-corde">4</div>
+                                    <button class="objectif-btn" onclick="changeCordeObjectif(1)" title="Augmenter l&#39;objectif">+</button>
+                                </div>
+                                <div class="stat-label">Objectif</div>
+                            </div>
+                        </div>
+                        <div class="stat-card border-success" id="manqueCard-corde">
+                            <div class="stat-value" id="manque-corde">1</div>
+                            <div class="stat-label" id="manqueLabel-corde">En plus</div>
+                        </div>
+                        <div class="stat-card" id="consecutifFaitCard-corde">
+                            <div class="stat-value" id="consecutifFait-corde">1</div>
+                            <div class="stat-label">Consécutif de fait</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="nbreAtteint-corde">3/3</div>
+                            <div class="stat-label">Nbre atteint</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="consecutifZero-corde">2</div>
+                            <div class="stat-label">Consécutifs à 0</div>
+                        </div>
+                        <div class="stat-card border-success" id="moyenneCard-corde">
+                            <div class="stat-value" id="moyenneJournaliere-corde">250%</div>
+                            <div class="stat-label">% / Jours</div>
+                        </div>
+                        <div class="stat-card border-success" id="predictionCard-corde">
+                            <div class="stat-value" id="prediction-corde">10</div>
+                            <div class="stat-label">Prédiction</div>
+                        </div>
+                        <div class="stat-card" id="totalZeroCard-corde">
+                            <div class="stat-value" id="totalZero-corde">2</div>
+                            <div class="stat-label">Total 0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalUn-corde">1</div>
+                            <div class="stat-label">Total 1</div>
+                        </div>
+                        <div class="stat-card" id="totalDeuxCard-corde">
+                            <div class="stat-value" id="totalDeux-corde">0</div>
+                            <div class="stat-label">Total 2</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalTrois-corde">0</div>
+                            <div class="stat-label">Total 3</div>
+                        </div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-header">
+                            <span class="progress-label">Progression vers l'objectif</span>
+                            <span class="progress-value" id="progressText-corde">25%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressBar-corde" style="width: 25%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" onclick="toggleSection(&#39;chartSection-corde&#39;)">
+                    <h2 class="card-title">📈 Graphique de Progression</h2>
+                    <button class="toggle-btn" id="chartToggle-corde">▼</button>
+                </div>
+                <div class="section-content" id="chartSection-corde">
+                    <div class="legend-controls" id="legendControls-corde">
+                        <button class="legend-btn active" onclick="toggleChartSeries(&#39;corde&#39;, &#39;daily&#39;)">
+                            <span class="legend-dot" style="background: #2563eb"></span> Par Jour
+                        </button>
+                        <button class="legend-btn active" onclick="toggleChartSeries(&#39;corde&#39;, &#39;cumulative&#39;)">
+                            <span class="legend-dot" style="background: #7c3aed"></span> Cumulatif
+                        </button>
+                        <button class="legend-btn active" onclick="toggleChartSeries(&#39;corde&#39;, &#39;target&#39;)">
+                            <span class="legend-dot" style="background: #ef4444"></span> Objectif
+                        </button>
+                        <button class="legend-btn active" onclick="toggleChartSeries(&#39;corde&#39;, &#39;prediction&#39;)">
+                            <span class="legend-dot" style="background: #10b981"></span> Prédiction
+                        </button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="progressChart-corde" width="1720" style="max-height: 330px; height: 330px; width: 1147px; display: block; box-sizing: border-box;" height="495"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" onclick="toggleSection(&#39;daysSection-corde&#39;)">
+                    <h2 class="card-title">🪢 Corde à Sauter par Jour</h2>
+                    <button class="toggle-btn" id="daysToggle-corde">▼</button>
+                </div>
+                <div class="section-content" id="daysSection-corde">
+                    <div class="days-grid" id="daysGrid-corde"><div class="day-card has-value streak-1" data-streak-days="1" data-streak-total="1">
+                    <div class="day-number">Jour 1</div>
+                    <input type="number" value="1" min="0" onchange="updateDaySeries(0, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    <div class="streak-badge">Série faible · 1</div>
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 2</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(1, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    
+                </div><div class="day-card today" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 3</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(2, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 4</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(3, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 5</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(4, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 6</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(5, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 7</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(6, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 8</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(7, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 9</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(8, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 10</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(9, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 11</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(10, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 12</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(11, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 13</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(12, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 14</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(13, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 15</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(14, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 16</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(15, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 17</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(16, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 18</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(17, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 19</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(18, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 20</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(19, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 21</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(20, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 22</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(21, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 23</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(22, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 24</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(23, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 25</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(24, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 26</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(25, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 27</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(26, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 28</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(27, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 29</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(28, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    
+                </div><div class="day-card" data-streak-days="0" data-streak-total="0">
+                    <div class="day-number">Jour 30</div>
+                    <input type="number" value="0" min="0" onchange="updateDaySeries(29, this.value, &#39;corde&#39;)" onclick="event.stopPropagation()">
+                    <div class="day-label">Corde à Sauter</div>
+                    
+                </div></div>
+                </div>
+            </div>
+
+            <!-- Section: Comparaison entre mois -->
+            <div class="card">
+                <div class="card-header" onclick="toggleSection(&#39;comparaisonSection-corde&#39;)">
+                    <h2 class="card-title">📊 Comparaison entre mois</h2>
+                    <button class="toggle-btn" id="comparaisonToggle-corde">▼</button>
+                </div>
+                <div class="section-content" id="comparaisonSection-corde">
+                    <div id="comparaisonTable-corde" style="overflow-x:auto; margin-bottom:20px;"><table class="comp-table"><thead><tr><th>Mois</th><th>Total Corde à Sauter</th><th>Objectif</th><th>% Atteint</th><th>Ranking</th><th>Estimation</th></tr></thead><tbody><tr><td>Janvier 2026</td><td><strong>0</strong></td><td>4</td><td><span class="comp-badge-red">❌ 0%</span></td><td><span class="comp-rank-2">🥈 2</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Février 2026</td><td><strong>0</strong></td><td>4</td><td><span class="comp-badge-red">❌ 0%</span></td><td><span class="comp-rank-3">🥉 3</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Mars 2026</td><td><strong>0</strong></td><td>4</td><td><span class="comp-badge-red">❌ 0%</span></td><td><span class="comp-rank-other">4</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Avril 2026</td><td><strong>0</strong></td><td>4</td><td><span class="comp-badge-red">❌ 0%</span></td><td><span class="comp-rank-other">5</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Mai 2026</td><td><strong>0</strong></td><td>4</td><td><span class="comp-badge-red">❌ 0%</span></td><td><span class="comp-rank-other">6</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Juin 2026</td><td><strong>0</strong></td><td>4</td><td><span class="comp-badge-red">❌ 0%</span></td><td><span class="comp-rank-other">7</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Juillet 2026</td><td><strong>0</strong></td><td>4</td><td><span class="comp-badge-red">❌ 0%</span></td><td><span class="comp-rank-other">8</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr><td>Août 2026</td><td><strong>0</strong></td><td>4</td><td><span class="comp-badge-red">❌ 0%</span></td><td><span class="comp-rank-other">9</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr style="font-weight:700;"><td>Septembre 2026 🔴</td><td><strong>1</strong></td><td>4</td><td><span class="comp-badge-red">❌ 25%</span></td><td><span class="comp-rank-1">🥇 1</span></td><td><span style="font-weight:600;">🔮 🥇 1</span> <span style="margin-left:6px;"><span class="comp-badge-green">✅ 250%</span></span></td></tr></tbody></table></div>
+                    <div id="comparaisonResume-corde" style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:20px;">
+                <div class="comp-resume-card"><div class="comp-resume-val">0</div><div class="comp-resume-lbl">Moyenne</div></div>
+                <div class="comp-resume-card"><div class="comp-resume-val" style="color:#dc2626">0</div><div class="comp-resume-lbl">Min — Janvier</div></div>
+                <div class="comp-resume-card"><div class="comp-resume-val" style="color:#16a34a">0</div><div class="comp-resume-lbl">Max — Janvier</div></div>
+                <div class="comp-resume-card"><div class="comp-resume-val">8</div><div class="comp-resume-lbl">Mois suivis</div></div>
+                <div class="comp-resume-card"><div class="comp-resume-val" style="color:#dc2626">0%</div><div class="comp-resume-lbl">Moyenne % Atteint</div></div></div>
+                    <canvas id="comparaisonChart-corde" style="box-sizing: border-box; display: block; height: 583px; width: 1167px;" width="1750" height="875"></canvas>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Footer -->
+        <!-- Version History Modal -->
+        <div class="vh-overlay" id="vhOverlay" onclick="closeVersionHistory(event)">
+            <div class="vh-modal">
+                <div class="vh-header">
+                    <div class="vh-title">📋 Historique des versions</div>
+                    <button class="vh-close" onclick="showVersionHistory(false)">✕</button>
+                </div>
+                <div class="vh-body" id="vhBody">
+                <div class="vh-stability">
+                    <div class="vh-stability-title">📊 Stabilité des versions</div>
+                    <div class="vh-donut-wrap">
+                        <canvas id="vhStabilityChart" width="330" height="330" style="display: block; box-sizing: border-box; height: 220px; width: 220px;"></canvas>
+                        <div class="vh-donut-center">
+                            <div class="vh-donut-center-num" id="vhDonutTotal">50</div>
+                            <div class="vh-donut-center-lbl">VERSIONS</div>
+                        </div>
+                    </div>
+                    <div class="vh-legend" id="vhLegend">
+                <div class="vh-legend-item">
+                    <span class="vh-legend-dot" style="background:#16a34a"></span>
+                    Stable (≥14j) — 6
+                </div>
+            
+                <div class="vh-legend-item">
+                    <span class="vh-legend-dot" style="background:#eab308"></span>
+                    Équilibré (7-13j) — 7
+                </div>
+            
+                <div class="vh-legend-item">
+                    <span class="vh-legend-dot" style="background:#dc2626"></span>
+                    Actif (≤6j) — 37
+                </div>
+            </div>
+                    <div class="vh-stat-cards">
+                        <div class="vh-stat-card"><div class="vh-stat-card-val" id="vhStatStable">6</div><div class="vh-stat-card-lbl">STABLES</div></div>
+                        <div class="vh-stat-card"><div class="vh-stat-card-val" id="vhStatEquilibre">7</div><div class="vh-stat-card-lbl">ÉQUILIBRÉES</div></div>
+                        <div class="vh-stat-card"><div class="vh-stat-card-val" id="vhStatActif">37</div><div class="vh-stat-card-lbl">ACTIVES</div></div>
+                        <div class="vh-stat-card"><div class="vh-stat-card-val" id="vhStatAvg">4.3j</div><div class="vh-stat-card-lbl">STABILITÉ MOYENNE</div></div>
+                    </div>
+                    <div class="vh-cat-lists" id="vhCatLists"><div class="vh-cat-list-row"><span class="vh-cat-list-lbl" style="color:#16a34a">Stable (≥14j) :</span><span class="vh-cat-list-vers">v16, v22, v20, v18, v39, v49</span></div><div class="vh-cat-list-row"><span class="vh-cat-list-lbl" style="color:#eab308">Équilibré (7-13j) :</span><span class="vh-cat-list-vers">v25, v17, v19, v24, v21, v23, v35</span></div><div class="vh-cat-list-row"><span class="vh-cat-list-lbl" style="color:#dc2626">Actif (≤6j) :</span><span class="vh-cat-list-vers">v48, v31, v32, v44, v50, v26, v27, v28, v29, v30</span></div></div>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v66</span>
+                        <span class="vh-ver-date">Septembre 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Bilan InterSports par Mois — Renommage des boutons d'options : « ⚙️ OPTION » devient « ⚙️ OPTION n » (Natation valable qu'à partir du mois de juin) et « ⚙️ OPTION 2 » devient « ⚙️ OPTION c » (Corde à sauter valable qu'à partir du mois de septembre).</li><li>Natation — Les statistiques de la section « Comparaison entre mois » (Moyenne, Min — Mois, Max — Mois, Mois suivis et Moyenne % Atteint) tiennent désormais compte de l'option n : lorsque l'option n est activée, les mois de janvier à mai sont exclus du calcul des statistiques natation (l'option c, sans effet sur la natation, n'y change rien).</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v65</span>
+                        <span class="vh-ver-date">Septembre 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Corde à Sauter — Comparaison entre mois : les 5 cartes résumé (Moyenne, Min — Mois, Max — Mois, Mois suivis, Moyenne % Atteint) sont désormais affichées côte à côte en disposition horizontale, identiques à Natation (et aux autres onglets).</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v64</span>
+                        <span class="vh-ver-date">Septembre 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Bilan InterSports par Mois — Ajout d'un second bouton « ⚙️ OPTION 2 » : option « Corde à sauter valable qu'à partir du mois de septembre ». Lorsqu'elle est activée, la Corde à Sauter est exclue du calcul du % TOTAL, du Ranking, de la Moyenne mois effectués (et de l'estimation fin de mois) pour les mois de janvier à août. Pour les mois de septembre à décembre, la Corde reste prise en compte comme avant.</li><li>Feedback visuel : bouton OPTION 2 en ambre lorsqu'actif ; cellules Corde des mois janvier–août affichent « — 🚫 hors calcul ».</li><li>État de l'option sauvegardé dans localStorage entre les sessions.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v63</span>
+                        <span class="vh-ver-date">Septembre 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Corde à Sauter — Graphique de Progression : les légendes « Par Jour », « Cumulatif », « Objectif » et « Prédiction » sont désormais de vraies bascules désactivables, indépendamment les unes des autres (correction des boutons qui ciblaient la page Natation).</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v62b</span>
+                        <span class="vh-ver-date">Septembre 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Retour à la base v61 et correction de l’affichage de la pastille et de l’historique.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v61</span>
+                        <span class="vh-ver-date">Septembre 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Corde à Sauter : calculs « Manque / En plus » et « % / Jours » alignés sur Natation.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v60</span>
+                        <span class="vh-ver-date">Septembre 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Corde à Sauter : objectif rendu modifiable avec les boutons − et +.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v59</span>
+                        <span class="vh-ver-date">Août 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>COMPARAISON_LABELS.corde ajouté → Comparaison entre mois OK.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v58</span>
+                        <span class="vh-ver-date">Août 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Map labels complétée, appel automatique buildComparaisonMois.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v57</span>
+                        <span class="vh-ver-date">Août 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>chartVisibility.corde ajouté → graphique visible.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v56</span>
+                        <span class="vh-ver-date">Août 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Canvas forcé à 330px de hauteur.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v55</span>
+                        <span class="vh-ver-date">Août 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Objectif défaut = 4, progressChart.corde initialisé.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v54</span>
+                        <span class="vh-ver-date">Août 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Suppression HTML statique Comparaison.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v53</span>
+                        <span class="vh-ver-date">Août 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Corrections Corde à Sauter : Graphique de Progression fonctionnel, Objectif par défaut = 4, boutons +/- opérationnels, nettoyage des données incorrectement héritées de Natation.</li><li>Historique des versions : entrée v52 restaurée dans le panneau.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v51</span>
+                        <span class="vh-ver-date">Août 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Natation — Statistiques Globales / Objectif : le bouton +/- édite désormais l'objectif du mois affiché uniquement, sans impacter les mois précédents ni les mois futurs.</li><li>Chaque mois peut avoir son propre objectif Natation (ex : Mai = 4, Juin = 8, Juillet = 0…). L'objectif peut désormais descendre jusqu'à 0.</li><li>Toutes les métriques dépendantes (% Atteint, Manque, Nbre atteint, Prédiction, Comparaison entre mois, Graphique de progression, Bilan InterSports par mois) utilisent maintenant l'objectif spécifique au mois consulté.</li><li>Rétro-compatibilité : les données existantes qui utilisaient l'ancien objectif global continuent de s'afficher normalement tant qu'aucun objectif par mois n'a été défini.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v50</span>
+                        <span class="vh-ver-date">Août 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Bilan InterSports par Mois — Ajout d'un bouton « ⚙️ OPTION » à côté du bouton de fermeture (✕). Clic pour activer, re-clic pour désactiver.</li><li>Option « Natation valable qu'à partir du mois de juin » : lorsqu'elle est activée, la Natation est exclue du calcul du % TOTAL, du Ranking, de la Moyenne mois effectués (et de l'estimation fin de mois) pour les mois de janvier à mai. Pour les mois de juin à décembre, la Natation reste prise en compte comme avant.</li><li>Feedback visuel : bouton OPTION en ambre lorsqu'actif ; cellules Natation des mois janvier–mai affichent « — 🚫 hors calcul ».</li><li>État de l'option sauvegardé dans localStorage entre les sessions.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v49</span>
+                        <span class="vh-ver-date">Août 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>🐛 Correction critique de la fonction Import : les regex de reconnaissance des noms de mois ne reconnaissaient pas les lettres accentuées majuscules Û, Ô, Î, Ù, Ï, Ç, Ë. Conséquence : le mois d'AOÛT (et potentiellement d'autres mois si accents similaires) était silencieusement ignoré lors de l'import.</li><li>La classe de caractères est maintenant [A-ZÀ-ÖØ-Þ] et couvre l'ensemble des accents majuscules latin-1. Après cette correction, un fichier exporté depuis n'importe quelle version (v41 → v48) importe désormais correctement tous les mois, y compris AOÛT et le mois en cours.</li><li>La fonction Export fonctionnait correctement et n'a pas été modifiée.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v48</span>
+                        <span class="vh-ver-date">Août 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Bilan InterSports par Mois — Amélioration visuelle de la ligne « mois en cours » 🔴 : espace nettement plus important entre la ligne du pourcentage réel et la ligne du pourcentage estimé 🔮 (marge portée de 4 px à 14 px) pour une lecture plus claire.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v47</span>
+                        <span class="vh-ver-date">Août 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Bilan InterSports par Mois — Ligne « mois en cours » 🔴 : ajout de l'estimation fin de mois pour les 6 premières colonnes (Séries, Jumps, 10 000 Pas, Jogging, Natation, % TOTAL) et pour la colonne Ranking, matérialisée par l'icône 🔮.</li><li>Le pourcentage estimé de chaque activité est calculé par extrapolation du rythme actuel sur le mois complet (identique au « % / Jours » des Statistiques Globales). Le % TOTAL estimé correspond à la moyenne des estimations sur les colonnes actives.</li><li>Le Ranking estimé positionne le mois en cours parmi les autres mois en comparant son % TOTAL projeté à leur % TOTAL réel.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v46</span>
+                        <span class="vh-ver-date">Août 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Comparaison entre mois — Colonne « Estimation » : pour le mois en cours, affichage désormais du pourcentage estimé à côté du ranking projeté. La valeur correspond au « % / Jours » de la carte « Statistiques Globales » (extrapolation du rythme actuel sur le mois complet).</li><li>Le pourcentage est présenté avec un badge coloré (✅ ≥ 100%, 🔶 ≥ 80%, ❌ &lt; 80%) pour une lecture immédiate.</li><li>Appliqué aux 5 onglets (Séries, Jumps, 10 000 Pas, Jogging, Natation).</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v45</span>
+                        <span class="vh-ver-date">Août 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Historique des versions : correction des dates de publication des versions v41, v42, v43 et v44 — passées de « Février 2026 » à « Août 2026 » pour respecter la chronologie réelle (la v40 datant de Juillet 2026).</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v44</span>
+                        <span class="vh-ver-date">Août 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Bilan InterSports par Mois — Correction visuelle des entêtes cliquables : lorsqu'un entête (Séries, Jumps, 10 000 Pas, Jogging, Natation) est réactivé après avoir été désactivé, il retrouve désormais correctement le fond bleu d'origine au lieu d'apparaître avec un fond blanc/transparent.</li><li>La couleur bleue est maintenant explicitement forcée sur les entêtes actifs (indépendamment du fond de la ligne d'entête), garantissant un rendu cohérent quel que soit l'état précédent.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v43</span>
+                        <span class="vh-ver-date">Août 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Bilan InterSports par Mois — Ajout d'une ligne « ∅ Moyenne mois effectués » insérée automatiquement entre le dernier mois terminé et le mois en cours.</li><li>Cette ligne affiche, pour chaque activité (Séries, Jumps, 10 000 Pas, Jogging, Natation), la moyenne du % Atteint calculée uniquement sur les mois déjà effectués, avec badge coloré (✅ ≥100%, 🔶 ≥80%, ❌ &lt;80%).</li><li>La colonne « % TOTAL » de la ligne moyenne affiche la moyenne globale sur les colonnes actives ; le Ranking n'est pas applicable pour cette ligne.</li><li>Style visuel dédié (fond bleu clair, bordure bleue, italique) pour bien distinguer cette ligne de synthèse des mois individuels.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v42</span>
+                        <span class="vh-ver-date">Août 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Comparaison entre mois — Ajout d'une nouvelle carte résumé « Moyenne % Atteint » : moyenne du pourcentage d'objectif atteint sur les mois suivis (mois déjà terminés uniquement, le mois en cours reste exclu).</li><li>Couleur adaptative de la valeur : vert ≥ 100%, orange ≥ 80%, rouge en dessous.</li><li>Appliqué aux 5 onglets (Séries, Jumps, 10 000 Pas, Jogging, Natation).</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v41</span>
+                        <span class="vh-ver-date">Août 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Bilan InterSports par Mois — Refonte du header : suppression de la ligne « INCLURE : SÉRIES / JUMPS / 10 000 PAS / JOGGING / NATATION » pour aérer la page.</li><li>Entêtes de colonnes cliquables : chaque métrique (Séries, Jumps, 10 000 Pas, Jogging, Natation) peut être activée / désactivée directement en cliquant sur son entête dans le tableau. Feedback visuel clair : entête grisé et barré quand désactivé, coloré quand actif.</li><li>Les colonnes désactivées ne sont plus prises en compte dans le calcul du %TOTAL, du Ranking, de la Moyenne, du Min, du Max et du nombre de Mois suivis (recalcul immédiat au clic).</li><li>Les colonnes Mois, % TOTAL et Ranking restent non-toggleables. L'état activé/désactivé est conservé dans localStorage entre les sessions.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v40</span>
+                        <span class="vh-ver-date">Juillet 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Natation — Comparaison entre mois : correction du lien entre l'Objectif éditable (Statistiques Globales) et la section "Comparaison entre mois". Auparavant, cliquer sur ＋ / − mettait bien à jour les Statistiques Globales mais pas le tableau/graphique de Comparaison entre mois (appel à des fonctions inexistantes). Désormais, chaque changement d'Objectif recalcule immédiatement la colonne "Objectif", le "% Atteint", le Ranking et l'Estimation du mois en cours dans "Comparaison entre mois", ainsi que le graphique de progression.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v39</span>
+                        <span class="vh-ver-date">Juillet 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Mise à disposition de la version v39 dans la Preview, avec boutons d'ouverture et de téléchargement.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v38</span>
+                        <span class="vh-ver-date">Juillet 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Bouton "Recap InterSports" : style harmonisé avec les boutons Exporter / Importer / Réinitialiser (fond blanc par défaut, fond bleu au survol uniquement).</li><li>Natation — Objectif éditable : la carte "Objectif" des Statistiques globales affiche désormais deux boutons ＋ / − permettant d'augmenter ou diminuer la valeur. Tous les calculs dépendants (Manque, % / Jours, Prédiction, Nbre atteint, barre de progression, graphiques, comparaison entre mois) sont recalculés instantanément. La nouvelle valeur est sauvegardée automatiquement.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v37</span>
+                        <span class="vh-ver-date">Juillet 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Bilan InterSports — Filtres de colonnes : chaque activité (Séries, Jumps, 10 000 Pas, Jogging, Natation) est désormais sélectionnable/désélectionnable via des boutons en haut du tableau. Seules les activités actives sont incluses dans le calcul du % Total et du Ranking.</li><li>Bilan InterSports — Nouvelle colonne "% TOTAL" : affichée juste avant Ranking, elle présente la moyenne des pourcentages de toutes les activités sélectionnées, avec badge coloré (✅ ≥100%, 🔶 ≥80%, ❌ &lt;80%).</li><li>Le Ranking est recalculé dynamiquement à chaque changement de sélection de colonnes, en se basant uniquement sur les activités actives.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v36</span>
+                        <span class="vh-ver-date">Juillet 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Ajout du bouton "Recap InterSports" (à droite de Réinitialiser) ouvrant un tableau de bilan mensuel croisé sur les 5 activités (Séries, Jumps, 10 000 Pas, Jogging, Natation).</li><li>Bilan par mois InterSports : pour chaque mois, affiche le total et le pourcentage de l'objectif atteint pour chaque activité, avec badges colorés (✅ ≥100%, 🔶 ≥80%, ❌ &lt;80%).</li><li>Ranking mensuel calculé sur la moyenne des pourcentages des 5 activités — médailles 🥇🥈🥉 pour les 3 premiers.</li><li>Cartes résumé : Moyenne globale, Min, Max et nombre de mois suivis (calculés sur les mois terminés).</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v35</span>
+                        <span class="vh-ver-date">Juillet 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Correction de l'indicateur "Dernier export" (anciennement "Dernière sauvegarde") : il ne fonctionnait plus depuis la suppression du bouton Sauvegarder en v34, car il dépendait de ce bouton. Il est désormais corrélé au bouton "Exporter" : la date/heure affichée est celle du dernier clic sur Exporter (persistée en localStorage, donc conservée après fermeture du navigateur).</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v34</span>
+                        <span class="vh-ver-date">Juillet 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Suppression complète du bouton "Sauvegarder" (redondant : chaque modification est déjà enregistrée automatiquement). Les boutons "Exporter", "Importer" et "Réinitialiser" sont réalignés à gauche.</li><li>Historique des versions : ajout d'un donut "Stabilité des versions". Stabilité = nombre de jours entre la publication d'une version et celle de la suivante — 🟢 Stable ≥14j, 🟡 Équilibré 7-13j, 🔴 Actif ≤6j. Le donut affiche le nombre total de versions, la répartition par catégorie et la stabilité moyenne.</li><li>Donut interactif : survol d'un segment pour afficher un tooltip (catégorie, nombre de versions, jusqu'à 10 numéros de version les plus stables). Une liste textuelle équivalente est affichée sous le graphique.</li><li>Note : les dates de publication des versions antérieures à la v34 n'étaient pas enregistrées au jour près ; elles ont été estimées à partir des mois connus. À partir de la v34, chaque nouvelle version enregistre sa date exacte, rendant le calcul de stabilité précis pour la suite.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v33</span>
+                        <span class="vh-ver-date">Juillet 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Onglet "Comparaison entre mois" : remplacement de la colonne "Pente" par "Estimation".</li><li>La colonne "Estimation" n'est renseignée que pour le mois en cours (pastille 🔴) : elle affiche le ranking projeté 🔮 calculé à partir de la même Prédiction que la carte "Statistiques Globales" (extrapolation du rythme actuel sur le mois complet), comparé au % Atteint des autres mois. Les mois terminés affichent "—".</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v32</span>
+                        <span class="vh-ver-date">Juillet 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Correction d'un bug d'encodage (mojibake) qui affichait des caractères corrompus à la place des icônes/emojis (📅 🦘 🚶 🏃 🏊 🌙 ☀️ etc.) et de certains caractères accentués français, causé par un ré-encodage successif UTF-8 → Windows-1252 → UTF-8 lors de sauvegardes précédentes. Tout le texte du fichier a été ré-analysé et restauré à son encodage correct.</li><li>La police Outfit (via le fichier css2 fourni, identique à celle déjà intégrée depuis la v31) reste inchangée et fonctionnelle.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v31</span>
+                        <span class="vh-ver-date">Juillet 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Police Outfit restaurée depuis le fichier css2 de v26 pour retrouver le rendu typographique attendu.</li><li>Correction du chiffre affiché sous les cartes de consécutifs : il additionne désormais les valeurs de la série en cours. Exemple : Jour 16 = 2 et total 11, Jour 17 = 2 affiche 13.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v30</span>
+                        <span class="vh-ver-date">Juillet 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Ajout d'une visualisation des consécutifs directement dans les cartes de jours : chaque série positive colore la case avec un dégradé progressif, faible de 1 à 4, moyen de 5 à 9, fort à partir de 10 jours consécutifs.</li><li>Application du système aux 5 onglets : Séries, Jumps, 10 000 Pas, Jogging et Natation.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v29</span>
+                        <span class="vh-ver-date">Juillet 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Correction Chrome : les données localStorage sont fusionnées avec la structure complète (5 onglets) au lieu d'être remplacées telles quelles. Une sauvegarde antérieure sans Natation ne bloque plus le démarrage dans Chrome.</li><li>Renommage de la section « Comparaison autres mois » en « Comparaison entre mois » sur les 5 onglets.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v28</span>
+                        <span class="vh-ver-date">Juillet 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Correction critique : tous les accès à localStorage passent désormais par un wrapper sécurisé (safeStorage) avec repli automatique en mémoire. Auparavant, si localStorage était bloqué (aperçu intégré, navigation privée, Safari en ouverture directe d'un fichier), la première ligne du script plantait et figeait toute l'application (onglets non cliquables). L'app démarre et fonctionne maintenant dans tous les contextes, avec sauvegarde persistante dès que localStorage est disponible.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v27</span>
+                        <span class="vh-ver-date">Juillet 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Correction critique : suppression de la dépendance externe à Google Fonts (introduite par erreur en v26), qui pouvait bloquer le chargement de la page — et donc figer les onglets — en l'absence de connexion internet. L'app utilise maintenant uniquement les polices système, garantissant un fonctionnement 100% standalone/hors-ligne.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v26</span>
+                        <span class="vh-ver-date">Juillet 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Comparaison autres mois : le Ranking est désormais calculé selon le % de l'objectif atteint (et non plus selon le total brut), pour les 5 onglets (Séries, Jumps, 10 000 Pas, Jogging, Natation).</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v25</span>
+                        <span class="vh-ver-date">Juin 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Ajout d'un 5ᵉ onglet NATATION 🏊 à la suite de Séries, Jumps, 10 000 Pas et Jogging.</li><li>Page Natation complète : Statistiques Globales (objectif = 4), Graphique de Progression, Natation par jour et Comparaison autres mois.</li><li>Export général étendu : chaque jour inclut désormais la valeur Natation.</li><li>Import rétrocompatible : les exports v24 (sans Natation) restent importables, Natation initialisée à 0.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v24</span>
+                        <span class="vh-ver-date">Juin 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Export général : peu importe l'onglet actif, l'export couvre tous les mois de tous les onglets (Séries, Jumps, 10 000 Pas, Jogging) depuis janvier 2026.</li><li>Le fichier exporté est nommé suivi_general_2026_<date>.txt et contient le marqueur EXPORT_GENERAL:OK.</date></li><li>Import rétrocompatible : les anciens fichiers (format SUIVI COMPLET) continuent de fonctionner normalement.</li><li>Import général : le nouveau format importe automatiquement tous les mois et tous les onglets en une seule opération.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v23</span>
+                        <span class="vh-ver-date">Juin 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Comparaison autres mois : Moyenne, Min, Max et Mois suivis calculés uniquement sur les mois terminés (le mois en cours est exclu).</li><li>Graphique Tendance : la pente de la droite de tendance est désormais calculée sur les seuls mois terminés.</li><li>Pastille version cliquable : ouverture de l'Historique des versions (ce panneau).</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v22</span>
+                        <span class="vh-ver-date">Mai 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Correction de l'icône Fichiers Importés : encodage direct UTF-8 — 📁 s'affiche maintenant correctement.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v21</span>
+                        <span class="vh-ver-date">Mai 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Remplacement de l'icône classeur (mal supportée) par 📥 universellement supporté.</li><li>📥 représente mieux une action d'import / réception de fichiers.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v20</span>
+                        <span class="vh-ver-date">Avril 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Ajout de la section Comparaison autres mois avec tableau et graphique par onglet.</li><li>Calcul du ranking mensuel et affichage des médailles.</li><li>Droite de tendance globale sur le graphique comparatif.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v19</span>
+                        <span class="vh-ver-date">Avril 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Correction du bug d'affichage du jour en cours (today) après navigation.</li><li>Amélioration de la gestion des données lors de l'import.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v18</span>
+                        <span class="vh-ver-date">Mars 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Ajout du mode sombre avec bascule en en-tête.</li><li>Persistance du thème via localStorage.</li><li>Variables CSS pour une cohérence totale light/dark.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v17</span>
+                        <span class="vh-ver-date">Mars 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Navigation multi-mois avec sélecteurs Mois et Année.</li><li>Bouton "Aujourd'hui" pour revenir rapidement au mois courant.</li></ul>
+                </div>
+            
+                <div class="vh-entry">
+                    <div class="vh-ver">
+                        <span class="vh-ver-num">v16</span>
+                        <span class="vh-ver-date">Février 2026</span>
+                    </div>
+                    <ul class="vh-items"><li>Première version publique avec 4 onglets : Séries, Jumps, 10 000 Pas, Jogging.</li><li>Grille de saisie journalière, statistiques et graphique de progression.</li><li>Export et import des données au format texte.</li></ul>
+                </div>
+            </div>
+                <div class="vh-footer">
+                    <span class="vh-footer-txt">Suivi 2026 · Édition v59 · 2026</span>
+                    <button class="btn btn-secondary" style="padding:8px 16px;font-size:0.82rem;" onclick="showVersionHistory(false)">Fermer</button>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="signature">DESIGN BY MLA · 2026</div>
+        </footer>
+    </div>
+
+    
+
+    <!-- Recap InterSports Modal -->
+    <div id="recapISOverlay" onclick="closeRecapInterSports(event)" class="">
+        <div id="recapISPanel">
+            <div class="recap-is-header">
+                <h2>📊 Bilan InterSports par Mois</h2>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <button class="recap-is-option on" id="recapISOptionBtn" onclick="toggleISOption()" title="Natation valable qu&#39;à partir du mois de juin"><span id="recapISOptionIcon">⚙️</span> OPTION n</button>
+                    <button class="recap-is-option on" id="recapISOptionBtn2" onclick="toggleISOption2()" title="Corde à sauter valable qu&#39;à partir du mois de septembre"><span id="recapISOptionIcon2">⚙️</span> OPTION c</button>
+                    <button class="recap-is-close" onclick="closeRecapInterSports(event)" title="Fermer">✕</button>
+                </div>
+            </div>
+            <div class="recap-is-body">
+                <div class="recap-is-table-wrap" id="recapISTableWrap"><table class="recap-is-table"><thead><tr><th>Mois</th><th class="recap-is-th-toggle" data-col="series" onclick="toggleISColumn(&#39;series&#39;)" title="Cliquer pour désactiver cette métrique">Séries</th><th class="recap-is-th-toggle" data-col="jump" onclick="toggleISColumn(&#39;jump&#39;)" title="Cliquer pour désactiver cette métrique">Jumps</th><th class="recap-is-th-toggle" data-col="pas" onclick="toggleISColumn(&#39;pas&#39;)" title="Cliquer pour désactiver cette métrique">10 000 Pas</th><th class="recap-is-th-toggle" data-col="jogging" onclick="toggleISColumn(&#39;jogging&#39;)" title="Cliquer pour désactiver cette métrique">Jogging</th><th class="recap-is-th-toggle" data-col="natation" onclick="toggleISColumn(&#39;natation&#39;)" title="Cliquer pour désactiver cette métrique">Natation</th><th class="recap-is-th-toggle" data-col="corde" onclick="toggleISColumn(&#39;corde&#39;)" title="Cliquer pour désactiver cette métrique">Corde à Sauter</th><th class="col-total-pct">% TOTAL</th><th>Ranking</th></tr></thead><tbody><tr><td>Janvier 2026</td><td>29s / <span class="is-badge-orange">🔶 94%</span></td><td>27j / <span class="is-badge-orange">🔶 87%</span></td><td>7p / <span class="is-badge-orange">🔶 88%</span></td><td>2jog / <span class="is-badge-red">❌ 50%</span></td><td style="color:var(--text-secondary);opacity:0.55;font-style:italic;">— <span class="recap-is-option-tag" title="Option active : natation valable qu&#39;à partir de juin">🚫 hors calcul</span></td><td style="color:var(--text-secondary);opacity:0.55;font-style:italic;">— <span class="recap-is-option-tag" title="Option active : corde à sauter valable qu&#39;à partir de septembre">🚫 hors calcul</span></td><td class="col-total-pct"><span class="is-badge-orange">🔶 80%</span></td><td><span class="is-rank-other">8</span></td></tr><tr><td>Février 2026</td><td>27s / <span class="is-badge-orange">🔶 96%</span></td><td>33j / <span class="is-badge-green">✅ 118%</span></td><td>5p / <span class="is-badge-red">❌ 63%</span></td><td>2jog / <span class="is-badge-red">❌ 50%</span></td><td style="color:var(--text-secondary);opacity:0.55;font-style:italic;">— <span class="recap-is-option-tag" title="Option active : natation valable qu&#39;à partir de juin">🚫 hors calcul</span></td><td style="color:var(--text-secondary);opacity:0.55;font-style:italic;">— <span class="recap-is-option-tag" title="Option active : corde à sauter valable qu&#39;à partir de septembre">🚫 hors calcul</span></td><td class="col-total-pct"><span class="is-badge-orange">🔶 82%</span></td><td><span class="is-rank-other">7</span></td></tr><tr><td>Mars 2026</td><td>24s / <span class="is-badge-red">❌ 77%</span></td><td>31j / <span class="is-badge-green">✅ 100%</span></td><td>9p / <span class="is-badge-green">✅ 113%</span></td><td>5jog / <span class="is-badge-green">✅ 125%</span></td><td style="color:var(--text-secondary);opacity:0.55;font-style:italic;">— <span class="recap-is-option-tag" title="Option active : natation valable qu&#39;à partir de juin">🚫 hors calcul</span></td><td style="color:var(--text-secondary);opacity:0.55;font-style:italic;">— <span class="recap-is-option-tag" title="Option active : corde à sauter valable qu&#39;à partir de septembre">🚫 hors calcul</span></td><td class="col-total-pct"><span class="is-badge-green">✅ 104%</span></td><td><span class="is-rank-1">🥇 1</span></td></tr><tr><td>Avril 2026</td><td>26s / <span class="is-badge-orange">🔶 87%</span></td><td>30j / <span class="is-badge-green">✅ 100%</span></td><td>14p / <span class="is-badge-green">✅ 175%</span></td><td>0jog / <span class="is-badge-red">❌ 0%</span></td><td style="color:var(--text-secondary);opacity:0.55;font-style:italic;">— <span class="recap-is-option-tag" title="Option active : natation valable qu&#39;à partir de juin">🚫 hors calcul</span></td><td style="color:var(--text-secondary);opacity:0.55;font-style:italic;">— <span class="recap-is-option-tag" title="Option active : corde à sauter valable qu&#39;à partir de septembre">🚫 hors calcul</span></td><td class="col-total-pct"><span class="is-badge-orange">🔶 91%</span></td><td><span class="is-rank-other">4</span></td></tr><tr><td>Mai 2026</td><td>25s / <span class="is-badge-orange">🔶 81%</span></td><td>31j / <span class="is-badge-green">✅ 100%</span></td><td>13p / <span class="is-badge-green">✅ 163%</span></td><td>0jog / <span class="is-badge-red">❌ 0%</span></td><td style="color:var(--text-secondary);opacity:0.55;font-style:italic;">— <span class="recap-is-option-tag" title="Option active : natation valable qu&#39;à partir de juin">🚫 hors calcul</span></td><td style="color:var(--text-secondary);opacity:0.55;font-style:italic;">— <span class="recap-is-option-tag" title="Option active : corde à sauter valable qu&#39;à partir de septembre">🚫 hors calcul</span></td><td class="col-total-pct"><span class="is-badge-orange">🔶 86%</span></td><td><span class="is-rank-other">6</span></td></tr><tr><td>Juin 2026</td><td>31s / <span class="is-badge-green">✅ 103%</span></td><td>36j / <span class="is-badge-green">✅ 120%</span></td><td>11p / <span class="is-badge-green">✅ 138%</span></td><td>0jog / <span class="is-badge-red">❌ 0%</span></td><td>4n / <span class="is-badge-green">✅ 100%</span></td><td style="color:var(--text-secondary);opacity:0.55;font-style:italic;">— <span class="recap-is-option-tag" title="Option active : corde à sauter valable qu&#39;à partir de septembre">🚫 hors calcul</span></td><td class="col-total-pct"><span class="is-badge-orange">🔶 92%</span></td><td><span class="is-rank-3">🥉 3</span></td></tr><tr><td>Juillet 2026</td><td>24s / <span class="is-badge-red">❌ 77%</span></td><td>26j / <span class="is-badge-orange">🔶 84%</span></td><td>11p / <span class="is-badge-green">✅ 138%</span></td><td>0jog / <span class="is-badge-red">❌ 0%</span></td><td>11n / <span class="is-badge-green">✅ 138%</span></td><td style="color:var(--text-secondary);opacity:0.55;font-style:italic;">— <span class="recap-is-option-tag" title="Option active : corde à sauter valable qu&#39;à partir de septembre">🚫 hors calcul</span></td><td class="col-total-pct"><span class="is-badge-orange">🔶 87%</span></td><td><span class="is-rank-other">5</span></td></tr><tr><td>Août 2026</td><td>15s / <span class="is-badge-red">❌ 48%</span></td><td>17j / <span class="is-badge-red">❌ 55%</span></td><td>18p / <span class="is-badge-green">✅ 225%</span></td><td>0jog / <span class="is-badge-red">❌ 0%</span></td><td>13n / <span class="is-badge-green">✅ 163%</span></td><td style="color:var(--text-secondary);opacity:0.55;font-style:italic;">— <span class="recap-is-option-tag" title="Option active : corde à sauter valable qu&#39;à partir de septembre">🚫 hors calcul</span></td><td class="col-total-pct"><span class="is-badge-orange">🔶 98%</span></td><td><span class="is-rank-2">🥈 2</span></td></tr><tr class="recap-is-avg-row"><td>∅ Moyenne mois effectués</td><td><span class="is-badge-orange">🔶 83%</span></td><td><span class="is-badge-orange">🔶 96%</span></td><td><span class="is-badge-green">✅ 138%</span></td><td><span class="is-badge-red">❌ 28%</span></td><td><span class="is-badge-green">✅ 134%</span></td><td><span style="color:var(--text-secondary);">—</span></td><td class="col-total-pct"><span class="is-badge-orange">🔶 90%</span></td><td><span style="color:var(--text-secondary);">—</span></td></tr><tr class="is-current-month"><td>Septembre 2026 🔴</td><td>3s / <span class="is-badge-red">❌ 10%</span><div style="margin-top:14px;font-size:0.82em;">🔮 <span class="is-badge-green">✅ 100%</span></div></td><td>6j / <span class="is-badge-red">❌ 20%</span><div style="margin-top:14px;font-size:0.82em;">🔮 <span class="is-badge-green">✅ 200%</span></div></td><td>0p / <span class="is-badge-red">❌ 0%</span><div style="margin-top:14px;font-size:0.82em;">🔮 <span class="is-badge-red">❌ 0%</span></div></td><td>0jog / <span class="is-badge-red">❌ 0%</span><div style="margin-top:14px;font-size:0.82em;">🔮 <span class="is-badge-red">❌ 0%</span></div></td><td>0n / <span class="is-badge-red">❌ 0%</span><div style="margin-top:14px;font-size:0.82em;">🔮 <span class="is-badge-red">❌ 0%</span></div></td><td>1c / <span class="is-badge-red">❌ 25%</span><div style="margin-top:14px;font-size:0.82em;">🔮 <span class="is-badge-green">✅ 250%</span></div></td><td class="col-total-pct"><span class="is-badge-red">❌ 9%</span><div style="margin-top:14px;font-size:0.82em;">🔮 <span class="is-badge-orange">🔶 92%</span></div></td><td><span class="is-rank-other">9</span><div style="margin-top:14px;font-size:0.82em;">🔮 <span class="is-rank-3">🥉 3</span></div></td></tr></tbody></table></div>
+                <div class="recap-is-summary" id="recapISSummary">
+                <div class="recap-is-summary-card">
+                    <div class="recap-is-summary-val" style="color:#2563eb">90%</div>
+                    <div class="recap-is-summary-lbl">Moyenne</div>
+                </div>
+                <div class="recap-is-summary-card">
+                    <div class="recap-is-summary-val" style="color:#dc2626">80%</div>
+                    <div class="recap-is-summary-lbl">Min — Janvier</div>
+                </div>
+                <div class="recap-is-summary-card">
+                    <div class="recap-is-summary-val" style="color:#16a34a">104%</div>
+                    <div class="recap-is-summary-lbl">Max — Mars</div>
+                </div>
+                <div class="recap-is-summary-card">
+                    <div class="recap-is-summary-val" style="color:#7c3aed">8</div>
+                    <div class="recap-is-summary-lbl">Mois suivis</div>
+                </div></div>
+            </div>
+        </div>
+    </div>
+<script src="script.js" defer></script>
+</body>
+</html>
