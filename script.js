@@ -1415,7 +1415,7 @@ console.log('Supabase initialisé');
 
         }  
         
-        async function updateCloudSyncDate() {
+        window.updateCloudSyncDate = async function() {
 
             try {
 
