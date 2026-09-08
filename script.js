@@ -1415,7 +1415,7 @@ console.log('Supabase initialisé');
 
         }  
 
-        function downloadAllData() {
+         function downloadAllData() {
             const pages = ['series', 'jump', 'pas', 'jogging', 'natation', 'corde'];
             const pageNames = { 'series': 'SÉRIES', 'jump': 'JUMP', 'pas': '10 000 PAS', 'jogging': 'JOGGING', 'natation': 'NATATION', 'corde': 'CORDE À SAUTER' };
             const monthNames = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
@@ -1487,7 +1487,7 @@ console.log('Supabase initialisé');
             updateMainLastSaveDisplay();
             }
 
-        function handleFileImport(input) {
+         function handleFileImport(input) {
             const file = input.files[0];
             if (!file) return;
             
