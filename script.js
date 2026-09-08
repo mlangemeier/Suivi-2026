@@ -1414,6 +1414,64 @@ console.log('Supabase initialisé');
             }
 
         }  
+        async function importFromSupabase() {
+
+            try {
+
+                const result = await window.supabaseClient
+                    .from('exports')
+                    .select('data')
+                    .eq('id', 1)
+                    .single();
+
+                if (result.error) {
+
+                    console.error(
+                        'Erreur lecture Supabase',
+                        result.error
+                    );
+
+                    showAlert(
+                        'Erreur lecture Cloud',
+                        'error'
+                    );
+
+                    return;
+                }
+
+                if (!result.data || !result.data.data) {
+
+                    showAlert(
+                        'Aucune sauvegarde Cloud trouvée',
+                     'error'
+                   );
+
+                   return;
+                }
+
+                parseImportedData(
+                result.data.data
+                );
+
+               console.log(
+                'Import Cloud OK'
+                );
+
+            } catch (err) {
+
+              console.error(
+                 'Erreur import Supabase',
+                 err
+               );
+
+              showAlert(
+                  'Erreur import Cloud',
+                  'error'
+             );
+
+            }
+
+        }
 
          function downloadAllData() {
             const pages = ['series', 'jump', 'pas', 'jogging', 'natation', 'corde'];
