@@ -1414,6 +1414,41 @@ console.log('Supabase initialisé');
             }
 
         }  
+        
+        async function updateCloudSyncDate() {
+
+            try {
+
+                const result = await window.supabaseClient
+                    .from('exports')
+                    .select('updated_at')
+                    .eq('id', 1)
+                    .single();
+
+                if (result.error) {
+                    return;
+                }
+
+                if (!result.data || !result.data.updated_at) {
+                    return;
+                }
+
+                const date = new Date(result.data.updated_at);
+
+                document.getElementById('cloudLastSync').textContent =
+                date.toLocaleString('fr-FR');
+
+            } catch (err) {
+
+               console.error(
+                   'Erreur récupération date cloud',
+                    err
+                 );
+
+            }
+
+        }
+        
         async function importFromSupabase() {
 
             try {
