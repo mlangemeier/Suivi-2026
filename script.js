@@ -17,6 +17,8 @@ window.supabase.createClient(
     SUPABASE_KEY
 );
 
+window.supabaseClient = supabaseClient;
+
 console.log('Supabase initialisé');
 
 // ============================================================
@@ -1387,6 +1389,32 @@ console.log('Supabase initialisé');
         // ============================================================
         // EXPORT / IMPORT
         // ============================================================
+       
+        async function saveExportToSupabase(content) {
+
+            try {
+
+                const result = await window.supabaseClient
+                    .from('exports')
+                    .update({
+                        data: content,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', 1);
+
+                console.log('Export Supabase OK', result);
+
+            } catch (err) {
+
+                console.error(
+                    'Erreur export Supabase',
+                    err
+                );
+   
+            }
+
+        }  
+
         function downloadAllData() {
             const pages = ['series', 'jump', 'pas', 'jogging', 'natation', 'corde'];
             const pageNames = { 'series': 'SÉRIES', 'jump': 'JUMP', 'pas': '10 000 PAS', 'jogging': 'JOGGING', 'natation': 'NATATION', 'corde': 'CORDE À SAUTER' };
@@ -1444,11 +1472,20 @@ console.log('Supabase initialisé');
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
 
-            showAlert(`Export général : ${sortedKeys.length} mois exportés!`, 'success');
+            saveExportToSupabase(content);
 
-            safeStorage.setItem('suivi2026_lastExport', new Date().toISOString());
+            showAlert(
+                `Export général : ${sortedKeys.length} mois exportés !`,
+                'success'
+            );
+
+            safeStorage.setItem(
+                'suivi2026_lastExport',
+                new Date().toISOString()
+            );
+
             updateMainLastSaveDisplay();
-        }
+            }
 
         function handleFileImport(input) {
             const file = input.files[0];
