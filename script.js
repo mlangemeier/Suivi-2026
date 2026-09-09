@@ -1363,14 +1363,24 @@ console.log('Supabase initialisé');
         }
 
         function updateMainLastSaveDisplay() {
-            const lastSaveTimeElement = document.getElementById('mainLastSaveTime');
-            const lastExport = safeStorage.getItem('suivi2026_lastExport');
+
+            const lastSaveTimeElement =
+                document.getElementById('cloudLastSync');
+
+            if (!lastSaveTimeElement) {
+                console.error('Element cloudLastSync introuvable');
+                return;
+            }
+
+            const lastExport =
+                safeStorage.getItem('suivi2026_lastExport');
 
             if (lastExport) {
                 const d = new Date(lastExport);
-                lastSaveTimeElement.textContent = d.toLocaleString('fr-FR');
+                lastSaveTimeElement.textContent =
+                    d.toLocaleString('fr-FR');
             } else {
-                lastSaveTimeElement.textContent = 'Aucune';
+                lastSaveTimeElement.textContent = '---';
             }
         }
 
