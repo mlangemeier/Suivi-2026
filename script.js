@@ -1722,6 +1722,11 @@ console.log('Supabase initialisé');
         // ============================================================
         const VERSION_HISTORY = [
             {
+                ver: 'v67', date: 'Septembre 2026', pubDate: '2026-09-14', items: [
+                    'Mise à jour de la version de l\'application.',
+                ]
+            },
+            {
                 ver: 'v66', date: 'Septembre 2026', pubDate: '2026-09-04', items: [
                     'Bilan InterSports par Mois — Renommage des boutons d\'options : « ⚙️ OPTION » devient « ⚙️ OPTION n » (Natation valable qu\'à partir du mois de juin) et « ⚙️ OPTION 2 » devient « ⚙️ OPTION c » (Corde à sauter valable qu\'à partir du mois de septembre).',
                     'Natation — Les statistiques de la section « Comparaison entre mois » (Moyenne, Min — Mois, Max — Mois, Mois suivis et Moyenne % Atteint) tiennent désormais compte de l\'option n : lorsque l\'option n est activée, les mois de janvier à mai sont exclus du calcul des statistiques natation (l\'option c, sans effet sur la natation, n\'y change rien).',
