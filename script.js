@@ -173,7 +173,7 @@ console.log('Supabase initialisé');
             });
             switchPage('series');
             updateMainLastSaveDisplay();
-            updateCloudSyncDate();
+            window.updateCloudSyncDate();
             setTimeout(function() {
                 ['series','jump','pas','jogging','natation','corde'].forEach(function(page) {
                     try { if (progressChart[page]) progressChart[page].resize(); } catch(e) {}
@@ -1508,7 +1508,7 @@ console.log('Supabase initialisé');
                 }
 
                 parseImportedData(result.data.data);
-                updateCloudSyncDate();
+                window.updateCloudSyncDate();
 
                console.log(
                 'Import Cloud OK'
