@@ -173,6 +173,7 @@ console.log('Supabase initialisé');
             });
             switchPage('series');
             updateMainLastSaveDisplay();
+            updateCloudSyncDate();
             setTimeout(function() {
                 ['series','jump','pas','jogging','natation','corde'].forEach(function(page) {
                     try { if (progressChart[page]) progressChart[page].resize(); } catch(e) {}
@@ -1401,29 +1402,40 @@ console.log('Supabase initialisé');
         // ============================================================
        
         async function saveExportToSupabase(content) {
+            const updatedAt = new Date().toISOString();
 
             try {
-
+                // upsert permet aussi de recréer la ligne si elle n'existe plus.
+                // select() est volontaire : sans lui, Supabase peut retourner 0
+                // ligne modifiée sans que l'application puisse le détecter.
                 const result = await window.supabaseClient
                     .from('exports')
-                    .update({
+                    .upsert({
+                        id: 1,
                         data: content,
-                        updated_at: new Date().toISOString()
-                    })
-                    .eq('id', 1);
+                        updated_at: updatedAt
+                    }, { onConflict: 'id' })
+                    .select('id, updated_at')
+                    .single();
 
-                console.log('Export Supabase OK', result);
+                if (result.error) throw result.error;
+                if (!result.data || result.data.id !== 1) {
+                    throw new Error('Aucune ligne Supabase confirmée après export.');
+                }
 
+                const confirmedDate = result.data.updated_at || updatedAt;
+                const cloudDateElement = document.getElementById('cloudLastSync');
+                if (cloudDateElement) {
+                    cloudDateElement.textContent = new Date(confirmedDate).toLocaleString('fr-FR');
+                }
+                console.log('Export Supabase confirmé', result.data);
+                return true;
             } catch (err) {
-
-                console.error(
-                    'Erreur export Supabase',
-                    err
-                );
-   
+                console.error('Erreur export Supabase', err);
+                showAlert('Export local effectué, mais échec de la sauvegarde Cloud', 'error');
+                return false;
             }
-
-        }  
+        }
         
         window.updateCloudSyncDate = async function() {
 
@@ -1436,6 +1448,7 @@ console.log('Supabase initialisé');
                     .single();
 
                 if (result.error) {
+                    console.error('Erreur récupération date Cloud', result.error);
                     return;
                 }
 
@@ -1494,9 +1507,8 @@ console.log('Supabase initialisé');
                    return;
                 }
 
-                parseImportedData(
-                result.data.data
-                );
+                parseImportedData(result.data.data);
+                updateCloudSyncDate();
 
                console.log(
                 'Import Cloud OK'
@@ -1518,7 +1530,7 @@ console.log('Supabase initialisé');
 
         }
 
-         function downloadAllData() {
+         async function downloadAllData() {
             const pages = ['series', 'jump', 'pas', 'jogging', 'natation', 'corde'];
             const pageNames = { 'series': 'SÉRIES', 'jump': 'JUMP', 'pas': '10 000 PAS', 'jogging': 'JOGGING', 'natation': 'NATATION', 'corde': 'CORDE À SAUTER' };
             const monthNames = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
@@ -1575,19 +1587,21 @@ console.log('Supabase initialisé');
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
 
-            saveExportToSupabase(content);
+            const cloudSaved = await saveExportToSupabase(content);
 
-            showAlert(
-                `Export général : ${sortedKeys.length} mois exportés !`,
-                'success'
-            );
+            if (cloudSaved) {
+                showAlert(
+                    `Export général : ${sortedKeys.length} mois exportés et sauvegardés dans le Cloud !`,
+                    'success'
+                );
 
-            safeStorage.setItem(
-                'suivi2026_lastExport',
-                new Date().toISOString()
-            );
+                safeStorage.setItem(
+                    'suivi2026_lastExport',
+                    new Date().toISOString()
+                );
 
-            updateMainLastSaveDisplay();
+                updateMainLastSaveDisplay();
+            }
             }
 
          function handleFileImport(input) {
