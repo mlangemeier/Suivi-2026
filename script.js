@@ -136,6 +136,20 @@ console.log('Supabase initialisé');
             corde: { daily: true, cumulative: true, target: true, prediction: true }
         };
 
+        // Ces valeurs sont utilisées par initApp(), qui peut démarrer avant
+        // l'exécution des déclarations situées plus bas dans ce script.
+        const COMPARAISON_LABELS = {
+            series: { col: 'Total Séries', chart: 'Total Séries' },
+            jump: { col: 'Total Jumps', chart: 'Total Jumps' },
+            pas: { col: 'Total 10 000 Pas', chart: '10 000 Pas' },
+            jogging: { col: 'Total Jogging', chart: 'Jogging' },
+            natation: { col: 'Total Natation', chart: 'Natation' },
+            corde: { col: 'Total Corde à Sauter', chart: 'Corde à Sauter' }
+        };
+
+        let comparaisonChart = { series: null, jump: null, pas: null, jogging: null, natation: null, corde: null };
+        let isOptionNatationFromJune = false;
+
         // ============================================================
         // INIT
         // ============================================================
@@ -173,7 +187,7 @@ console.log('Supabase initialisé');
             });
             switchPage('series');
             updateMainLastSaveDisplay();
-            window.updateCloudSyncDate();
+            updateCloudSyncDate();
             setTimeout(function() {
                 ['series','jump','pas','jogging','natation','corde'].forEach(function(page) {
                     try { if (progressChart[page]) progressChart[page].resize(); } catch(e) {}
@@ -683,17 +697,6 @@ console.log('Supabase initialisé');
         // ============================================================
         // COMPARAISON AUTRES MOIS (tous onglets)
         // ============================================================
-        const COMPARAISON_LABELS = {
-            series: { col: 'Total Séries', chart: 'Total Séries' },
-            jump: { col: 'Total Jumps', chart: 'Total Jumps' },
-            pas: { col: 'Total 10 000 Pas', chart: '10 000 Pas' },
-            jogging: { col: 'Total Jogging', chart: 'Jogging' },
-            natation: { col: 'Total Natation', chart: 'Natation' },
-            corde: { col: 'Total Corde à Sauter', chart: 'Corde à Sauter' }
-        };
-
-        let comparaisonChart = { series: null, jump: null, pas: null, jogging: null, natation: null, corde: null };
-
         function getComparaisonObjectifMois(page, year, monthIdx) {
             const daysInMonth = new Date(year, monthIdx + 1, 0).getDate();
             if (page === 'series' || page === 'jump') return daysInMonth;
@@ -1437,7 +1440,7 @@ console.log('Supabase initialisé');
             }
         }
         
-        window.updateCloudSyncDate = async function() {
+        async function updateCloudSyncDate() {
 
             try {
 
@@ -1508,7 +1511,7 @@ console.log('Supabase initialisé');
                 }
 
                 parseImportedData(result.data.data);
-                window.updateCloudSyncDate();
+                updateCloudSyncDate();
 
                console.log(
                 'Import Cloud OK'
@@ -2271,7 +2274,6 @@ console.log('Supabase initialisé');
 
         // v50 : Option "Natation valable qu'à partir du mois de juin"
         // Quand activée : pour janvier→mai, natation est exclue du calcul du % TOTAL / Ranking / Moyennes
-        let isOptionNatationFromJune = false;
         (function loadISOptionNatation() {
             try {
                 const raw = safeStorage.getItem('recapIS_optionNatFromJune_v50');
