@@ -1409,29 +1409,24 @@ console.log('Supabase initialisé');
 
             try {
                 // upsert permet aussi de recréer la ligne si elle n'existe plus.
-                // select() est volontaire : sans lui, Supabase peut retourner 0
-                // ligne modifiée sans que l'application puisse le détecter.
+                // Ne pas chaîner select().single() ici : cela exige une politique
+                // SELECT en plus des politiques INSERT/UPDATE et échoue avec
+                // certaines configurations RLS, notamment depuis Safari mobile.
                 const result = await window.supabaseClient
                     .from('exports')
                     .upsert({
                         id: 1,
                         data: content,
                         updated_at: updatedAt
-                    }, { onConflict: 'id' })
-                    .select('id, updated_at')
-                    .single();
+                    }, { onConflict: 'id' });
 
                 if (result.error) throw result.error;
-                if (!result.data || result.data.id !== 1) {
-                    throw new Error('Aucune ligne Supabase confirmée après export.');
-                }
 
-                const confirmedDate = result.data.updated_at || updatedAt;
                 const cloudDateElement = document.getElementById('cloudLastSync');
                 if (cloudDateElement) {
-                    cloudDateElement.textContent = new Date(confirmedDate).toLocaleString('fr-FR');
+                    cloudDateElement.textContent = new Date(updatedAt).toLocaleString('fr-FR');
                 }
-                console.log('Export Supabase confirmé', result.data);
+                console.log('Export Supabase confirmé');
                 return true;
             } catch (err) {
                 console.error('Erreur export Supabase', err);
@@ -1590,6 +1585,14 @@ console.log('Supabase initialisé');
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
 
+            // L'export local est réussi même si le réseau ou Supabase échoue.
+            // Conserver cette information indépendamment du résultat Cloud.
+            safeStorage.setItem(
+                'suivi2026_lastExport',
+                new Date().toISOString()
+            );
+            updateMainLastSaveDisplay();
+
             const cloudSaved = await saveExportToSupabase(content);
 
             if (cloudSaved) {
@@ -1597,13 +1600,6 @@ console.log('Supabase initialisé');
                     `Export général : ${sortedKeys.length} mois exportés et sauvegardés dans le Cloud !`,
                     'success'
                 );
-
-                safeStorage.setItem(
-                    'suivi2026_lastExport',
-                    new Date().toISOString()
-                );
-
-                updateMainLastSaveDisplay();
             }
             }
 
