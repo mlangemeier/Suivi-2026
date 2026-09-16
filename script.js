@@ -1739,6 +1739,11 @@ console.log('Supabase initialisé');
         // ============================================================
         const VERSION_HISTORY = [
             {
+                ver: 'v68', date: 'Septembre 2026', pubDate: '2026-09-16', items: [
+                    'Bilan InterSports par Mois — la fenêtre d\'affichage est désormais une page pleine, offrant davantage d\'espace et de visibilité pour le tableau mensuel.',
+                ]
+            },
+            {
                 ver: 'v67', date: 'Septembre 2026', pubDate: '2026-09-14', items: [
                     'Mise à jour de la version de l\'application.',
                 ]
@@ -2344,11 +2349,13 @@ console.log('Supabase initialisé');
             refreshISOptionBtn();
             refreshISOptionBtn2();
             document.getElementById('recapISOverlay').classList.add('open');
+            document.body.classList.add('recap-is-open');
         }
 
         function closeRecapInterSports(e) {
             if (!e || e.target === document.getElementById('recapISOverlay') || e.currentTarget.classList.contains('recap-is-close')) {
                 document.getElementById('recapISOverlay').classList.remove('open');
+                document.body.classList.remove('recap-is-open');
             }
         }
 
