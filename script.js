@@ -133,6 +133,9 @@ console.log('Supabase initialisé');
         };
 
         let trainingData = createDefaultTrainingData();
+        let cloudSyncTimer = null;
+        let cloudSyncInFlight = false;
+        let cloudSyncQueued = false;
 
         let progressChart = { series: null, jump: null, pas: null, jogging: null, natation: null, corde: null };
         
@@ -447,6 +450,7 @@ console.log('Supabase initialisé');
                 updateStats(page);
                 updateChart(page);
                 buildComparaisonMois(page);
+                scheduleCloudSync();
                 showAlert('Jour ' + (dayIndex + 1) + ' mis à jour!', 'success');
             }
         }
@@ -1343,6 +1347,35 @@ console.log('Supabase initialisé');
             updateMainLastSaveDisplay();
         }
 
+        // Les modifications locales doivent aussi être envoyées au Cloud.
+        // Le délai évite plusieurs requêtes lorsque plusieurs jours sont
+        // modifiés rapidement, notamment sur Safari iOS.
+        function scheduleCloudSync() {
+            if (cloudSyncTimer) clearTimeout(cloudSyncTimer);
+            cloudSyncTimer = setTimeout(function() {
+                cloudSyncTimer = null;
+                syncTrainingDataToCloud();
+            }, 800);
+        }
+
+        async function syncTrainingDataToCloud() {
+            if (cloudSyncInFlight) {
+                cloudSyncQueued = true;
+                return;
+            }
+
+            cloudSyncInFlight = true;
+            try {
+                await saveExportToSupabase(buildExportContent());
+            } finally {
+                cloudSyncInFlight = false;
+                if (cloudSyncQueued) {
+                    cloudSyncQueued = false;
+                    scheduleCloudSync();
+                }
+            }
+        }
+
         function loadData() {
             const saved = safeStorage.getItem('trainingData_v10');
             if (saved) {
@@ -1424,6 +1457,7 @@ console.log('Supabase initialisé');
                 initializeDays(currentPage);
                 updateStats(currentPage);
                 updateChart(currentPage);
+                scheduleCloudSync();
                 showAlert('Mois réinitialisé!', 'info');
             }
         }
@@ -1585,7 +1619,7 @@ console.log('Supabase initialisé');
 
         }
 
-         async function downloadAllData() {
+        function buildExportContent() {
             const pages = ['series', 'jump', 'pas', 'jogging', 'natation', 'corde'];
             const pageNames = { 'series': 'SÉRIES', 'jump': 'JUMP', 'pas': '10 000 PAS', 'jogging': 'JOGGING', 'natation': 'NATATION', 'corde': 'CORDE À SAUTER' };
             const monthNames = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
@@ -1636,6 +1670,11 @@ console.log('Supabase initialisé');
                 }
             });
 
+            return content;
+        }
+
+        async function downloadAllData() {
+            const content = buildExportContent();
             const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -1658,13 +1697,13 @@ console.log('Supabase initialisé');
 
             if (cloudSaved) {
                 showAlert(
-                    `Export général : ${sortedKeys.length} mois exportés et sauvegardés dans le Cloud !`,
+                    'Export général sauvegardé dans le Cloud !',
                     'success'
                 );
             }
-            }
+        }
 
-         function handleFileImport(input) {
+            function handleFileImport(input) {
             const file = input.files[0];
             if (!file) return;
             
@@ -1755,6 +1794,7 @@ console.log('Supabase initialisé');
                 });
                 buildAllComparaisonMois();
                 switchPage('series');
+                scheduleCloudSync();
                 showAlert(`Import général : ${totalImported} mois importés!`, 'success');
 
             } else {
@@ -1795,6 +1835,7 @@ console.log('Supabase initialisé');
                 pages.forEach(page => { initializeDays(page); updateStats(page); updateChart(page); });
                 buildAllComparaisonMois();
                 switchPage('series');
+                scheduleCloudSync();
                 showAlert(`Données importées pour ${monthName} ${year}!`, 'success');
             }
         }
@@ -2286,6 +2327,7 @@ console.log('Supabase initialisé');
             updateStats('corde');
             try { updateChart('corde'); } catch(e) {}
             try { buildComparaisonMois('corde'); } catch(e) {}
+            scheduleCloudSync();
         }
 
         // ============================================================
@@ -2319,6 +2361,7 @@ console.log('Supabase initialisé');
             try { updateChart('natation'); } catch(e) { console.error('updateChart natation', e); }
             try { buildComparaisonMois('natation'); } catch(e) { console.error('buildComparaisonMois natation', e); }
             saveData();
+            scheduleCloudSync();
         }
 
         // Colonnes actives pour le Recap InterSports (toutes actives par défaut)
