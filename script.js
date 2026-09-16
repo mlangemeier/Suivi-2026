@@ -63,6 +63,15 @@ console.log('Supabase initialisé');
         // ============================================================
         const TRAINING_PAGES = ['series', 'jump', 'pas', 'jogging', 'natation', 'corde'];
         const DEFAULT_OBJECTIFS = { series: 30, jump: 30, pas: 8, jogging: 4, natation: 4, corde: 4 };
+        // Objectifs Natation déjà définis pour les mois suivis en 2026.
+        // Les valeurs existantes restent prioritaires afin de ne pas écraser
+        // une modification effectuée par l'utilisateur.
+        const NATATION_OBJECTIFS_2026 = {
+            '2026-5': 4, // juin
+            '2026-6': 8, // juillet
+            '2026-7': 8, // août
+            '2026-8': 4  // septembre
+        };
 
         function createDefaultPageData(page) {
             return {
@@ -165,6 +174,7 @@ console.log('Supabase initialisé');
                 if (cc) { cc.removeAttribute('width'); cc.removeAttribute('height'); cc.removeAttribute('style'); }
             });
             loadData();
+            ensureNatationMonthlyObjectives();
             ['series', 'jump', 'pas', 'jogging', 'natation', 'corde'].forEach(function(page) {
                 updateNavigation(page);
                 initializeDays(page);
@@ -1366,6 +1376,24 @@ console.log('Supabase initialisé');
             }
         }
 
+        function ensureNatationMonthlyObjectives() {
+            if (!trainingData.natation) {
+                trainingData.natation = createDefaultPageData('natation');
+            }
+            if (!trainingData.natation.monthlyObjectifs) {
+                trainingData.natation.monthlyObjectifs = {};
+            }
+
+            let changed = false;
+            Object.keys(NATATION_OBJECTIFS_2026).forEach(function(key) {
+                if (!Object.prototype.hasOwnProperty.call(trainingData.natation.monthlyObjectifs, key)) {
+                    trainingData.natation.monthlyObjectifs[key] = NATATION_OBJECTIFS_2026[key];
+                    changed = true;
+                }
+            });
+            if (changed) saveData();
+        }
+
         function updateMainLastSaveDisplay() {
 
             const lastSaveTimeElement =
@@ -1403,6 +1431,15 @@ console.log('Supabase initialisé');
         // ============================================================
         // EXPORT / IMPORT
         // ============================================================
+
+        function describeSupabaseError(error) {
+            if (!error) return 'Erreur inconnue';
+            if (error.name === 'AbortError') return 'Délai réseau dépassé';
+            if (error.code === '42501') return 'Droits RLS insuffisants';
+            if (error.code === '42P01') return 'Table exports introuvable';
+            if (error.code === '42703') return 'Colonne Supabase introuvable';
+            return error.message || error.details || error.hint || String(error);
+        }
        
         async function saveExportToSupabase(content) {
             const updatedAt = new Date().toISOString();
@@ -1412,13 +1449,22 @@ console.log('Supabase initialisé');
                 // Ne pas chaîner select().single() ici : cela exige une politique
                 // SELECT en plus des politiques INSERT/UPDATE et échoue avec
                 // certaines configurations RLS, notamment depuis Safari mobile.
-                const result = await window.supabaseClient
+                if (!window.supabaseClient) {
+                    throw new Error('Client Supabase indisponible');
+                }
+
+                const request = window.supabaseClient
                     .from('exports')
                     .upsert({
                         id: 1,
                         data: content,
                         updated_at: updatedAt
                     }, { onConflict: 'id' });
+                const timeout = new Promise((_, reject) => setTimeout(
+                    () => reject(Object.assign(new Error('Délai réseau dépassé'), { name: 'AbortError' })),
+                    15000
+                ));
+                const result = await Promise.race([request, timeout]);
 
                 if (result.error) throw result.error;
 
@@ -1430,7 +1476,8 @@ console.log('Supabase initialisé');
                 return true;
             } catch (err) {
                 console.error('Erreur export Supabase', err);
-                showAlert('Export local effectué, mais échec de la sauvegarde Cloud', 'error');
+                const reason = describeSupabaseError(err);
+                showAlert(`Export local effectué, mais échec Cloud : ${reason}`, 'error');
                 return false;
             }
         }
@@ -1541,6 +1588,9 @@ console.log('Supabase initialisé');
                     Object.keys(trainingData[page].months).forEach(k => allMonthKeys.add(k));
                 }
             });
+            if (trainingData.natation && trainingData.natation.monthlyObjectifs) {
+                Object.keys(trainingData.natation.monthlyObjectifs).forEach(k => allMonthKeys.add(k));
+            }
             const sortedKeys = Array.from(allMonthKeys).sort();
 
             let content = '================================================\n';
@@ -1561,6 +1611,7 @@ console.log('Supabase initialisé');
                 content += '================================================\n';
                 content += `         DÉTAIL PAR JOUR - ${monthName.toUpperCase()} ${year}\n`;
                 content += '================================================\n\n';
+                content += `Objectif Natation: ${getNatationObjectifForMonth(year, monthIdx)}\n\n`;
 
                 for (let dayNum = 1; dayNum <= daysInMonth; dayNum++) {
                     content += `--- JOUR ${dayNum} ---\n`;
@@ -1643,6 +1694,14 @@ console.log('Supabase initialisé');
 
                     const key = `${year}-${monthIndex}`;
                     const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+
+                    const natationObjectifMatch = block.match(/Objectif Natation:\s*(\d+(?:\.\d+)?)/i);
+                    if (natationObjectifMatch) {
+                        if (!trainingData.natation.monthlyObjectifs) {
+                            trainingData.natation.monthlyObjectifs = {};
+                        }
+                        trainingData.natation.monthlyObjectifs[key] = Number(natationObjectifMatch[1]);
+                    }
 
                     // Init month arrays
                     pages.forEach(page => {
