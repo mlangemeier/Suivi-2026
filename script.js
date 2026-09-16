@@ -1745,7 +1745,7 @@ console.log('Supabase initialisé');
             },
             {
                 ver: 'v67', date: 'Septembre 2026', pubDate: '2026-09-14', items: [
-                    'Mise à jour de la version de l\'application.',
+                    'Mise en place et paramétrages du bouton Cloud avec passerelle avec Supabase.',
                 ]
             },
             {
