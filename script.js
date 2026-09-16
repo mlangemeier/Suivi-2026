@@ -1436,6 +1436,8 @@ console.log('Supabase initialisé');
             if (!error) return 'Erreur inconnue';
             if (error.name === 'AbortError') return 'Délai réseau dépassé';
             if (error.code === '42501') return 'Droits RLS insuffisants';
+            if (error.code === '401') return 'Clé Supabase refusée';
+            if (error.code === '403') return 'Accès Supabase interdit';
             if (error.code === '42P01') return 'Table exports introuvable';
             if (error.code === '42703') return 'Colonne Supabase introuvable';
             return error.message || error.details || error.hint || String(error);
@@ -1445,28 +1447,36 @@ console.log('Supabase initialisé');
             const updatedAt = new Date().toISOString();
 
             try {
-                // upsert permet aussi de recréer la ligne si elle n'existe plus.
-                // Ne pas chaîner select().single() ici : cela exige une politique
-                // SELECT en plus des politiques INSERT/UPDATE et échoue avec
-                // certaines configurations RLS, notamment depuis Safari mobile.
-                if (!window.supabaseClient) {
-                    throw new Error('Client Supabase indisponible');
-                }
-
-                const request = window.supabaseClient
-                    .from('exports')
-                    .upsert({
+                // Appel REST direct : sur iOS/WebKit, supabase-js peut remonter
+                // un simple "TypeError: Load failed" lorsque son préflight
+                // échoue. L'API REST avec les seuls en-têtes nécessaires évite
+                // ce préflight supplémentaire.
+                const request = fetch(`${SUPABASE_URL}/rest/v1/exports?on_conflict=id`, {
+                    method: 'POST',
+                    headers: {
+                        apikey: SUPABASE_KEY,
+                        Authorization: `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json',
+                        Prefer: 'resolution=merge-duplicates,return=minimal'
+                    },
+                    body: JSON.stringify({
                         id: 1,
                         data: content,
                         updated_at: updatedAt
-                    }, { onConflict: 'id' });
+                    })
+                });
                 const timeout = new Promise((_, reject) => setTimeout(
                     () => reject(Object.assign(new Error('Délai réseau dépassé'), { name: 'AbortError' })),
                     15000
                 ));
                 const result = await Promise.race([request, timeout]);
 
-                if (result.error) throw result.error;
+                if (!result.ok) {
+                    const responseText = await result.text();
+                    const error = new Error(`HTTP ${result.status}${responseText ? ` — ${responseText}` : ''}`);
+                    error.code = String(result.status);
+                    throw error;
+                }
 
                 const cloudDateElement = document.getElementById('cloudLastSync');
                 if (cloudDateElement) {
