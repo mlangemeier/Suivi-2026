@@ -21,6 +21,33 @@ window.supabaseClient = supabaseClient;
 
 console.log('Supabase initialisé');
 
+async function getSupabaseSessionDiagnostic() {
+    try {
+        const result = await supabaseClient.auth.getSession();
+        const session = result && result.data ? result.data.session : null;
+        const diagnostic = {
+            hasSession: !!session,
+            role: session ? 'authenticated' : 'anon',
+            userId: session && session.user ? session.user.id : null,
+            sessionError: result ? result.error : null
+        };
+        console.log('Diagnostic session Supabase', diagnostic);
+        return { session, diagnostic };
+    } catch (error) {
+        const diagnostic = {
+            hasSession: false,
+            role: 'anon',
+            userId: null,
+            sessionError: error
+        };
+        console.error('Diagnostic session Supabase impossible', diagnostic);
+        return { session: null, diagnostic };
+    }
+}
+
+window.runSupabaseDiagnostic = getSupabaseSessionDiagnostic;
+getSupabaseSessionDiagnostic();
+
 // ============================================================
         // STOCKAGE SÉCURISÉ (localStorage avec repli mémoire)
         // ============================================================
@@ -1470,7 +1497,7 @@ console.log('Supabase initialisé');
             if (!error) return 'Erreur inconnue';
             if (error.name === 'AbortError') return 'Délai réseau dépassé';
             if (error.code === '42501') return 'Droits RLS insuffisants';
-            if (error.code === '401') return 'Clé Supabase refusée';
+            if (error.code === '401' || /jwt|token|unauthorized/i.test(error.message || '')) return 'Session absente, expirée ou clé refusée';
             if (error.code === '403') return 'Accès Supabase interdit';
             if (error.code === '42P01') return 'Table exports introuvable';
             if (error.code === '42703') return 'Colonne Supabase introuvable';
@@ -1481,15 +1508,20 @@ console.log('Supabase initialisé');
             const updatedAt = new Date().toISOString();
 
             try {
+                const sessionResult = await getSupabaseSessionDiagnostic();
+                const accessToken = sessionResult.session && sessionResult.session.access_token;
+                const authorizationToken = accessToken || SUPABASE_KEY;
+
                 // Appel REST direct : sur iOS/WebKit, supabase-js peut remonter
                 // un simple "TypeError: Load failed" lorsque son préflight
                 // échoue. L'API REST avec les seuls en-têtes nécessaires évite
-                // ce préflight supplémentaire.
+                // ce préflight supplémentaire. Si une session existe, son JWT
+                // est utilisé afin que RLS voie le rôle authenticated.
                 const request = fetch(`${SUPABASE_URL}/rest/v1/exports?on_conflict=id`, {
                     method: 'POST',
                     headers: {
                         apikey: SUPABASE_KEY,
-                        Authorization: `Bearer ${SUPABASE_KEY}`,
+                        Authorization: `Bearer ${authorizationToken}`,
                         'Content-Type': 'application/json',
                         Prefer: 'resolution=merge-duplicates,return=minimal'
                     },
@@ -1509,6 +1541,12 @@ console.log('Supabase initialisé');
                     const responseText = await result.text();
                     const error = new Error(`HTTP ${result.status}${responseText ? ` — ${responseText}` : ''}`);
                     error.code = String(result.status);
+                    error.details = {
+                        role: sessionResult.diagnostic.role,
+                        userId: sessionResult.diagnostic.userId,
+                        response: responseText
+                    };
+                    console.error('Diagnostic écriture Supabase', error.details);
                     throw error;
                 }
 
