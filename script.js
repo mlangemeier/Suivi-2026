@@ -163,6 +163,10 @@ getSupabaseSessionDiagnostic();
         let cloudSyncTimer = null;
         let cloudSyncInFlight = false;
         let cloudSyncQueued = false;
+        // v69 : variables déclarées explicitement pour éviter tout ReferenceError.
+        let lastMorningExportDate = safeStorage.getItem('lastMorningExportDate') || null;
+        const IS_MOBILE = /iPhone|iPad|iPod|Android|Mobile/i.test(navigator.userAgent) ||
+            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
         let progressChart = { series: null, jump: null, pas: null, jogging: null, natation: null, corde: null };
         
@@ -1508,58 +1512,40 @@ getSupabaseSessionDiagnostic();
             const updatedAt = new Date().toISOString();
 
             try {
-                const sessionResult = await getSupabaseSessionDiagnostic();
-                const accessToken = sessionResult.session && sessionResult.session.access_token;
-                const authorizationToken = accessToken || SUPABASE_KEY;
+                // v69 : une seule chaîne séquentielle, compatible Safari iOS.
+                // 1) écriture Supabase, 2) relecture/validation, 3) mise à jour UI.
+                const writeResult = await window.supabaseClient
+                    .from('exports')
+                    .upsert({ id: 1, data: content, updated_at: updatedAt }, { onConflict: 'id' });
 
-                // Appel REST direct : sur iOS/WebKit, supabase-js peut remonter
-                // un simple "TypeError: Load failed" lorsque son préflight
-                // échoue. L'API REST avec les seuls en-têtes nécessaires évite
-                // ce préflight supplémentaire. Si une session existe, son JWT
-                // est utilisé afin que RLS voie le rôle authenticated.
-                const request = fetch(`${SUPABASE_URL}/rest/v1/exports?on_conflict=id`, {
-                    method: 'POST',
-                    headers: {
-                        apikey: SUPABASE_KEY,
-                        Authorization: `Bearer ${authorizationToken}`,
-                        'Content-Type': 'application/json',
-                        Prefer: 'resolution=merge-duplicates,return=minimal'
-                    },
-                    body: JSON.stringify({
-                        id: 1,
-                        data: content,
-                        updated_at: updatedAt
-                    })
-                });
-                const timeout = new Promise((_, reject) => setTimeout(
-                    () => reject(Object.assign(new Error('Délai réseau dépassé'), { name: 'AbortError' })),
-                    15000
-                ));
-                const result = await Promise.race([request, timeout]);
+                if (writeResult.error) throw writeResult.error;
 
-                if (!result.ok) {
-                    const responseText = await result.text();
-                    const error = new Error(`HTTP ${result.status}${responseText ? ` — ${responseText}` : ''}`);
-                    error.code = String(result.status);
-                    error.details = {
-                        role: sessionResult.diagnostic.role,
-                        userId: sessionResult.diagnostic.userId,
-                        response: responseText
-                    };
-                    console.error('Diagnostic écriture Supabase', error.details);
-                    throw error;
+                const verifyResult = await window.supabaseClient
+                    .from('exports')
+                    .select('data, updated_at')
+                    .eq('id', 1)
+                    .single();
+
+                if (verifyResult.error) throw verifyResult.error;
+                const cloudData = (verifyResult.data && verifyResult.data.data) || '';
+
+                // Tolérance de ±5 caractères pour éviter les faux négatifs dus
+                // aux normalisations de fin de ligne/encodage.
+                if (Math.abs(cloudData.length - content.length) > 5) {
+                    throw new Error(`Vérification Cloud incorrecte (${cloudData.length}/${content.length} caractères)`);
                 }
 
                 const cloudDateElement = document.getElementById('cloudLastSync');
                 if (cloudDateElement) {
-                    cloudDateElement.textContent = new Date(updatedAt).toLocaleString('fr-FR');
+                    const confirmedAt = (verifyResult.data && verifyResult.data.updated_at) || updatedAt;
+                    cloudDateElement.textContent = new Date(confirmedAt).toLocaleString('fr-FR');
                 }
-                console.log('Export Supabase confirmé');
+                console.log('Export Supabase écrit et vérifié');
                 return true;
             } catch (err) {
                 console.error('Erreur export Supabase', err);
                 const reason = describeSupabaseError(err);
-                showAlert(`Export local effectué, mais échec Cloud : ${reason}`, 'error');
+                showAlert(`Échec Cloud : ${reason}`, 'error');
                 return false;
             }
         }
@@ -1713,31 +1699,41 @@ getSupabaseSessionDiagnostic();
 
         async function downloadAllData() {
             const content = buildExportContent();
-            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `suivi_general_2026_${new Date().toISOString().slice(0,10)}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
+            const exportedAt = new Date().toISOString();
 
-            // L'export local est réussi même si le réseau ou Supabase échoue.
-            // Conserver cette information indépendamment du résultat Cloud.
-            safeStorage.setItem(
-                'suivi2026_lastExport',
-                new Date().toISOString()
-            );
+            // Étape 1 : sauvegarde locale.
+            safeStorage.setItem('trainingData_v10', JSON.stringify(trainingData));
+            safeStorage.setItem('suivi2026_lastExport', exportedAt);
+            lastMorningExportDate = exportedAt.slice(0, 10);
+            safeStorage.setItem('lastMorningExportDate', lastMorningExportDate);
             updateMainLastSaveDisplay();
 
+            // Étape 2 : attendre impérativement la fin de l'envoi Cloud.
+            // Aucun téléchargement n'est lancé avant cette confirmation.
             const cloudSaved = await saveExportToSupabase(content);
+            if (!cloudSaved) return;
 
-            if (cloudSaved) {
-                showAlert(
-                    'Export général sauvegardé dans le Cloud !',
-                    'success'
-                );
+            // Étape 3 : Safari iOS/mobile ne lance pas le .txt : cela évite
+            // qu'un téléchargement bloqué interrompe la fonction Exporter.
+            if (IS_MOBILE) {
+                showAlert('Export Cloud confirmé (téléchargement .txt ignoré sur mobile).', 'success');
+                return;
+            }
+
+            try {
+                const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `suivi_general_2026_${exportedAt.slice(0,10)}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+                showAlert('Export Cloud confirmé et fichier téléchargé.', 'success');
+            } catch (err) {
+                console.error('Téléchargement local impossible', err);
+                showAlert('Cloud confirmé, mais téléchargement local impossible.', 'info');
             }
         }
 
@@ -1882,6 +1878,14 @@ getSupabaseSessionDiagnostic();
         // VERSION HISTORY
         // ============================================================
         const VERSION_HISTORY = [
+            {
+                ver: 'v69', date: 'Septembre 2026', pubDate: '2026-09-21', items: [
+                    'Exporter est maintenant strictement séquentiel : sauvegarde locale, envoi Supabase attendu et vérifié, puis téléchargement du fichier texte sur ordinateur.',
+                    'Sur mobile et Safari iOS, le téléchargement .txt est volontairement ignoré afin qu’un blocage du navigateur ne puisse plus interrompre l’envoi Supabase.',
+                    'Déclaration explicite de lastMorningExportDate pour supprimer le risque de ReferenceError pendant une sauvegarde.',
+                    'Vérification Cloud tolérante à un écart maximal de 5 caractères afin d’éviter les faux négatifs liés aux fins de ligne ou à l’encodage.'
+                ]
+            },
             {
                 ver: 'v68', date: 'Septembre 2026', pubDate: '2026-09-16', items: [
                     'Bilan InterSports par Mois — la fenêtre d\'affichage est désormais une page pleine, offrant davantage d\'espace et de visibilité pour le tableau mensuel.',
